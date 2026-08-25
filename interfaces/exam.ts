@@ -6,5 +6,6 @@ export default interface Exam {
   data: string;
   local: string;
   id_paciente: number;
+  nome_paciente?: string;
   lembrete_enviado: boolean;
 }
