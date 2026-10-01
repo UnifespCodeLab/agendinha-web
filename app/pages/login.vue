@@ -117,6 +117,7 @@ export default defineComponent({
         else this.$router.push("/");
         const permission = await Notification.requestPermission();
         if(permission == 'granted') await usePush(this.auth.user.id_usuario);
+        this.loader.endLoading()
         return;
       }
 

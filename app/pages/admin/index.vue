@@ -1,42 +1,6 @@
 <template>
   <v-container fluid class="d-flex ga-2 flex-column pb-16">
 
-    <!-- LOGIN -->
-    <template v-if="!autenticado">
-      <v-app-bar>
-        <template #prepend>
-          <v-app-bar-nav-icon>
-            <img src="/images/agendinha_logo.png" class="logo">
-          </v-app-bar-nav-icon>
-        </template>
-        <template #append>
-          <span class="font-weight-bold text-subtitle-1 mr-4">Painel Admin</span>
-        </template>
-      </v-app-bar>
-      <div class="d-flex flex-column ga-2 pt-4 mx-auto w-100 mt-8" style="max-width: 400px;">
-        <p class="font-weight-bold text-h6 mb-3 text-center">Acesso restrito</p>
-        <v-text-field
-          v-model="login.email"
-          prepend-inner-icon="mdi-email-outline"
-          label="E-mail"
-        />
-        <v-text-field
-          v-model="login.senha"
-          prepend-inner-icon="mdi-form-textbox-password"
-          label="Senha"
-          :type="showSenha ? 'text' : 'password'"
-          :append-inner-icon="showSenha ? 'mdi-eye' : 'mdi-eye-off'"
-          @click:append-inner="showSenha = !showSenha"
-          @keyup.enter="fazerLogin"
-        />
-        <v-btn class="w-100 mt-2" color="primary" :loading="entrando" @click="fazerLogin">
-          Entrar
-        </v-btn>
-      </div>
-    </template>
-
-    <!-- RECEPÇÃO -->
-    <template v-else>
       <v-app-bar>
         <template #prepend>
           <v-app-bar-nav-icon>
@@ -255,8 +219,6 @@
         </v-card>
       </v-dialog>
 
-    </template>
-
   </v-container>
 </template>
 
@@ -264,20 +226,19 @@
 import type Appointment from '~~/shared/types/appointment';
 import type CalendarAttributes from '~~/shared/types/calendarAttributes';
 import { parseDateFromAPI, compareDateOnly, formatDateToAPI, formatDatetimeLocal } from '~/utils/date';
+import { useAuthStore } from '~/stores/auth';
 
-definePageMeta({ middleware: [] });
+definePageMeta({ middleware: 'auth', requiresRole: 'ROLE_ADMIN' });
 
 const { $api, $toast } = useNuxtApp();
 const toast = $toast as any;
-const tokenCookie = useCookie<string | null>('token_recepcao');
+const auth = useAuthStore();
+const tokenCookie = useCookie<string | null>('token');
+const router = useRouter();
 
 // States
 const formRef = ref<any>(null);
 const editingAppointmentId = ref<number | null>(null);
-const autenticado = ref(false);
-const entrando = ref(false);
-const showSenha = ref(false);
-const login = ref({ email: '', senha: '' });
 
 const salvando = ref(false);
 const pacientesEncontrados = ref<any[]>([]);
@@ -439,34 +400,9 @@ const handleEditAppointment = (id: number) => {
   tab.value = 'novo';
 };
 
-const fazerLogin = async () => {
-  if (!login.value.email || !login.value.senha) return;
-  entrando.value = true;
-  try {
-    const res = await $api('/admin/login', {
-      method: 'POST',
-      body: login.value,
-    });
-    if (res.status === 200) {
-      tokenCookie.value = res.data.token;
-      autenticado.value = true;
-      fetchExams();
-    } else {
-      toast.error('E-mail ou senha incorretos.');
-    }
-  } catch {
-    toast.error('Erro ao fazer login.');
-  } finally {
-    entrando.value = false;
-  }
-};
-
 const sair = () => {
-  tokenCookie.value = null;
-  autenticado.value = false;
-  login.value = { email: '', senha: '' };
-  allExams.value = [];
-  dayExams.value = [];
+  auth.logout();
+  router.push('/login');
 };
 
 const salvarAgendamento = async () => {
@@ -554,10 +490,7 @@ watch(pesquisaPaciente, (val: string) => {
 
 // Lifecycle
 onMounted(() => {
-  if (tokenCookie.value) {
-    autenticado.value = true;
-    fetchExams();
-  }
+  fetchExams();
 });
 </script>
 

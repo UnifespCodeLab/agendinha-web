@@ -62,8 +62,9 @@
         </v-tabs-window-item>
         <v-tabs-window-item value="calendar">
           <section class="calendar">
-            <client-only>
-              <NewCalendar
+            <ClientOnly>
+              <component
+                :is="'NewCalendar'"
                 locale="pt-BR" 
                 expanded
                 borderless
@@ -71,7 +72,7 @@
                 :attributes='attributes'
                 @dayclick="onDayClick"
               />
-            </client-only>
+            </ClientOnly>
           </section>
           <section v-if="dayAppointments.length > 0" class="scroll">
             <p class="mt-4 mb-4">Compromissos marcados nesse dia</p>
@@ -91,6 +92,8 @@
         :medico="selectedAppointment.medico"
         :data="selectedAppointment.data"
         :local="selectedAppointment.local"
+        :id_paciente="selectedAppointment.id_usuario"
+        :nome_paciente="selectedAppointment.nome_paciente"
         :lembrete_enviado="selectedAppointment.lembrete_enviado"
         :show="showAppointmentDetails"
         :modo_google="auth.googleTokens.access_token != undefined"
@@ -100,7 +103,7 @@
   </v-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import type Appointment from "~~/shared/types/appointment";
 import convertToISODate from "~/utils/convertToISODate";
 import moment from "moment";
@@ -109,15 +112,16 @@ import type CalendarAttributes from "~~/shared/types/calendarAttributes";
 import type CalendarDay from "~~/shared/types/calendarDay";
 import { useAuthStore } from "~/stores/auth";
 
+definePageMeta({ 
+  middleware: "auth", 
+  showHeader: true,
+  requiresRole: "ROLE_USER"
+});
+</script>
+
+<script lang="ts">
 export default defineComponent({
   name: "Home",
-  setup() {
-    definePageMeta({ 
-      middleware: "auth", 
-      showHeader: true,
-      requiresRole: "ROLE_USER"
-    });
-  },
   data() {
     return {
       loader: useLoaderStore(),
@@ -153,36 +157,40 @@ export default defineComponent({
     const { $api } = useNuxtApp();
     const token = useCookie("token");
 
-    const response = await $api("/agendamentos/usuario", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-    
-    this.allAppointments = response.data ?? [];
-    if(this.allAppointments.length <= 0) {
-      this.loader.endLoading();
-      this.noAppointments = true;
-      return;
-    }
-
-    this.allAppointments.forEach((Appointment) => 
-      this.attributes.push({
-        key: Appointment.titulo,
-        bar: {
-          style: {
-            backgroundColor: '#E32585'
-          }
+    try {
+      const response = await $api("/agendamentos/usuario", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
         },
-        dates: convertToISODate(Appointment.data),
-      })
-    );
+      });
+      
+      this.allAppointments = response.data ?? [];
+      if(this.allAppointments.length <= 0) {
+        this.noAppointments = true;
+        return;
+      }
 
-    this.updateAppointmentsList();
-    this.updateText();
+      this.allAppointments.forEach((Appointment) => 
+        this.attributes.push({
+          key: Appointment.titulo,
+          bar: {
+            style: {
+              backgroundColor: '#E32585'
+            }
+          },
+          dates: convertToISODate(Appointment.data),
+        })
+      );
 
-    this.loader.endLoading();
+      this.updateAppointmentsList();
+      this.updateText();
+    } catch (e) {
+      console.error(e);
+      this.noAppointments = true;
+    } finally {
+      this.loader.endLoading();
+    }
   },
   methods: {
     updateAppointmentsList() {
