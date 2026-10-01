@@ -30,12 +30,12 @@ export const useAuthStore = defineStore("auth", {
         if(info.status != 200) return { status: info.status };
 
         const data = info.data;
-        if(!data.usuario.cadastro_confirmado) return { status: 403 };
 
         this.notifications = data.notificacoes;
         Object.assign(this.user, data.usuario);
-
         this.authenticated = true;
+
+        if(!data.usuario.cadastro_confirmado) return { status: 403 };
 
         const notReadNotifications: NotificationType[] = this.notifications.filter(
           (notification) => !notification.lida,
