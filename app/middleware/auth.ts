@@ -32,7 +32,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
     if (!allowedRoles.includes(user.value.role)) {
-      if (to.path !== "/") return navigateTo(user.value.role == "ROLE_ADMIN" ? "/admin" : "/");
+      const target = user.value.role == "ROLE_ADMIN" ? "/admin" : "/";
+      if (to.path !== target) return navigateTo(target);
       return;
     }
   }

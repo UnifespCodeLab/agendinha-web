@@ -1,6 +1,6 @@
 import type UserToken from "~~/shared/types/userToken";
 import type UserAuth from "~~/shared/types/userAuth";
-import type Notification from "~~/shared/types/notification";
+import type NotificationType from "~~/shared/types/notification";
 import type GoogleTokens from "~~/shared/types/googleTokens";
 import type UserGoogleAuth from "~~/shared/types/userGoogleAuth";
 import { googleSdkLoaded } from "vue3-google-login";
@@ -11,7 +11,7 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: {} as User,
     authenticated: false,
-    notifications: [] as Notification[],
+    notifications: [] as NotificationType[],
     notReadNotifications: 0, 
     page: '/',
     googleTokens: {} as GoogleTokens,
@@ -20,21 +20,24 @@ export const useAuthStore = defineStore("auth", {
     async refreshAuth() {
       try {
         const { $api } = useNuxtApp();
-        const info: any = await $api(
-          `/usuarios/${this.user.id_usuario}`,
-          { method: "GET" }
-        );
+        const token = useCookie("token");
+        
+        const info: any = await $api('/usuarios', { 
+          method: "GET",
+          headers: { Authorization: `Bearer ${token.value}` }
+        });
+        
         if(info.status != 200) return { status: info.status };
 
         const data = info.data;
-        if(!data.usuario.cadastro_confirmado) return { status: 403 };
 
         this.notifications = data.notificacoes;
         Object.assign(this.user, data.usuario);
-
         this.authenticated = true;
 
-        const notReadNotifications: Notification[] = this.notifications.filter(
+        if(!data.usuario.cadastro_confirmado) return { status: 403 };
+
+        const notReadNotifications: NotificationType[] = this.notifications.filter(
           (notification) => !notification.lida,
         );
 
