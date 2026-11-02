@@ -1,8 +1,8 @@
 import type User from "./user";
-import type Notification from "./notification";
+import type NotificationType from "./notification";
 
 export default interface UserToken {
   usuario: User;
-  notificacoes: Notification[];
+  notificacoes: NotificationType[];
   token: string;
 }

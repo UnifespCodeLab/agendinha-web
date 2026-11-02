@@ -1,4 +1,4 @@
-import type Notification from "#shared/types/notification";
+import type NotificationType from "#shared/types/notification";
 
 export const useNotification = () => {
   const config = useRuntimeConfig();
@@ -6,7 +6,7 @@ export const useNotification = () => {
 
   const getPatientNotifications = async (
     user_id: number,
-  ): Promise<Notification[]> => {
+  ): Promise<NotificationType[]> => {
     const response = await $fetch<{ data: Notification[] }>(
       `${config.public.apiBase}/notificacoes/usuario/${user_id}`,
       {

@@ -39,8 +39,8 @@
           <section v-if="noAppointments">
             <p class="text-center">Sem compromissos nas próximas semanas.</p>
           </section>
-          <section v-else>
-            <section v-if="weekAppointments.length > 0" class="scroll">
+          <section v-else class="scroll">
+            <section v-if="weekAppointments.length > 0">
               <p class="mb-2">
                 {{ statusMessage.begin }}
                 <span class="text-blue-dark font-weight-bold">{{
@@ -48,22 +48,25 @@
                 }}</span>
                 {{ statusMessage.end }} para esta semana.
               </p>
-              <section class="scroll">
-                <appointment-card-generator :appointments="weekAppointments" @request-details="(appointment: Appointment) => requestDetails(appointment)" />
-              </section>
+              <appointment-card-generator
+                :appointments="weekAppointments"
+                @request-details="(appointment: Appointment) => requestDetails(appointment)"
+              />
             </section>
             <section v-if="futureAppointments.length > 0">
               <p class="mt-4 mb-4">Compromissos futuros</p>
-              <section class="scroll">
-                <appointment-card-generator :appointments="futureAppointments" @request-details="(appointment: Appointment) => requestDetails(appointment)" />
-              </section>
+              <appointment-card-generator
+                :appointments="futureAppointments"
+                @request-details="(appointment: Appointment) => requestDetails(appointment)"
+              />
             </section>
           </section>
         </v-tabs-window-item>
         <v-tabs-window-item value="calendar">
           <section class="calendar">
-            <client-only>
-              <NewCalendar
+            <ClientOnly>
+              <component
+                :is="'NewCalendar'"
                 locale="pt-BR" 
                 expanded
                 borderless
@@ -71,7 +74,7 @@
                 :attributes='attributes'
                 @dayclick="onDayClick"
               />
-            </client-only>
+            </ClientOnly>
           </section>
           <section v-if="dayAppointments.length > 0" class="scroll">
             <p class="mt-4 mb-4">Compromissos marcados nesse dia</p>
@@ -91,6 +94,7 @@
         :medico="selectedAppointment.medico"
         :data="selectedAppointment.data"
         :local="selectedAppointment.local"
+        :nome_paciente="selectedAppointment.nome_paciente"
         :lembrete_enviado="selectedAppointment.lembrete_enviado"
         :show="showAppointmentDetails"
         :modo_google="auth.accessToken != undefined"
@@ -152,36 +156,40 @@ export default defineComponent({
     const { $api } = useNuxtApp();
     const token = useCookie("token");
 
-    const response = await $api("/agendamentos/usuario", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-    
-    this.allAppointments = response.data ?? [];
-    if(this.allAppointments.length <= 0) {
-      this.loader.endLoading();
-      this.noAppointments = true;
-      return;
-    }
-
-    this.allAppointments.forEach((Appointment) => 
-      this.attributes.push({
-        key: Appointment.titulo,
-        bar: {
-          style: {
-            backgroundColor: '#E32585'
-          }
+    try {
+      const response = await $api("/agendamentos/usuario", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
         },
-        dates: convertToISODate(Appointment.data),
-      })
-    );
+      });
+      
+      this.allAppointments = response.data ?? [];
+      if(this.allAppointments.length <= 0) {
+        this.noAppointments = true;
+        return;
+      }
 
-    this.updateAppointmentsList();
-    this.updateText();
+      this.allAppointments.forEach((Appointment) => 
+        this.attributes.push({
+          key: Appointment.titulo,
+          bar: {
+            style: {
+              backgroundColor: '#E32585'
+            }
+          },
+          dates: convertToISODate(Appointment.data),
+        })
+      );
 
-    this.loader.endLoading();
+      this.updateAppointmentsList();
+      this.updateText();
+    } catch (e) {
+      console.error(e);
+      this.noAppointments = true;
+    } finally {
+      this.loader.endLoading();
+    }
   },
   methods: {
     updateAppointmentsList() {
@@ -272,8 +280,9 @@ export default defineComponent({
 
 <style scoped>
 .scroll {
-  overflow-y: scroll;
-  height: 400px;
+  overflow-y: auto;
+  max-height: calc(100dvh - 220px);
+  padding-bottom: 80px;
 }
 
 .calendar {

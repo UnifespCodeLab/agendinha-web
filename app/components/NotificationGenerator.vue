@@ -19,11 +19,11 @@
 </template>
 
 <script lang="ts" setup>
-import type Notification from "~~/shared/types/notification";
+import type NotificationType from "~~/shared/types/notification";
 
 const props = defineProps({
   notifications: {
-    type: Array as PropType<Notification[]>,
+    type: Array as PropType<NotificationType[]>,
     required: true,
   },
   color: {
@@ -33,7 +33,7 @@ const props = defineProps({
 });
 defineEmits(['requestDetails']);
 
-const allNotifications = ref([] as Notification[]);
+const allNotifications = ref([] as NotificationType[]);
 allNotifications.value = props.notifications;
 
 watch(

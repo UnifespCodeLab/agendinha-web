@@ -52,7 +52,7 @@ import { useLoaderStore } from "~/stores/loader";
 export default defineComponent({
   name: "UpdateProfile",
   setup() {
-    definePageMeta({ middleware: "auth", requiresRole: "ROLE_USER" });
+    definePageMeta({ requiresRole: "ROLE_USER" });
   },
   data() {
     return {

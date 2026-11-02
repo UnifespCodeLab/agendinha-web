@@ -21,26 +21,24 @@ export const useAuthStore = defineStore("auth", {
       try {
         const { $api } = useNuxtApp();
         const token = useCookie("token");
-        const info: any = await $api('/usuarios', 
-          { 
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token.value}`,
-            },
-          }
-        );
+        
+        const info: any = await $api('/usuarios', { 
+          method: "GET",
+          headers: { Authorization: `Bearer ${token.value}` }
+        });
         
         if(info.status != 200) return { status: info.status };
 
         const data = info.data;
-        if(!data.usuario.cadastro_confirmado) return { status: 403 };
 
         this.notifications = data.notificacoes;
         this.user = data.usuario;
         this.authenticated = true;
 
+        if(!data.usuario.cadastro_confirmado) return { status: 403 };
+
         const notReadNotifications: Notification[] = this.notifications.filter(
-          (notification) => !notification.lida,
+          (notification: Notification) => !notification.lida,
         );
 
         this.notReadNotifications = notReadNotifications.length;

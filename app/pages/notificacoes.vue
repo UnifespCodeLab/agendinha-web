@@ -16,7 +16,7 @@
             <NotificationGenerator 
             :notifications="notReadNotifications" 
             color="blue-light" 
-            @request-details="(notification: Notification) => requestDetails(notification)"
+            @request-details="(notification: NotificationType) => requestDetails(notification)"
             />
           </section>
         </section> 
@@ -26,7 +26,7 @@
             <NotificationGenerator 
             :notifications="readNotifications" 
             color="#F8F8F8" 
-            @request-details="(notification: Notification) => requestDetails(notification)"
+            @request-details="(notification: NotificationType) => requestDetails(notification)"
             />
           </section>
         </section>
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import type Notification from "~~/shared/types/notification";
+import type NotificationType from "~~/shared/types/notification";
 import { useLoaderStore } from "~/stores/loader";
 import { useAuthStore } from "~/stores/auth";
 
@@ -62,12 +62,12 @@ export default defineComponent({
   },
   data() {
     return {
-      readNotifications: ref([] as Notification[]),
-      notReadNotifications: ref([] as Notification[]),
+      readNotifications: ref([] as NotificationType[]),
+      notReadNotifications: ref([] as NotificationType[]),
       loader: useLoaderStore(),
       auth: storeToRefs(useAuthStore()),
       showNotificationDetails: ref(false),
-      selectedNotification: ref({} as Notification)
+      selectedNotification: ref({} as NotificationType)
     };
   },
   async mounted() {
@@ -88,7 +88,7 @@ export default defineComponent({
 
       this.auth.notReadNotifications = this.notReadNotifications.length;
     },
-    requestDetails(notification: Notification) {
+    requestDetails(notification: NotificationType) {
       this.selectedNotification = notification;
       this.showNotificationDetails = !this.showNotificationDetails;
     },
@@ -104,7 +104,7 @@ export default defineComponent({
         },
       });
 
-      const notifications: Notification[] = response.data ?? [];
+      const notifications: NotificationType[] = response.data ?? [];
 
       if(notifications.length > 0) {
         this.readNotifications = notifications.filter(

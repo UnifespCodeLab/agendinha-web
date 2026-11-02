@@ -9,4 +9,5 @@ export default interface ShowAppointment {
   lembrete_enviado: boolean;
   show: boolean;
   modo_google: boolean;
+  modo_admin?: boolean;
 }
