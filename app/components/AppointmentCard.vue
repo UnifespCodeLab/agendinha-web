@@ -2,8 +2,9 @@
     <v-bottom-sheet
         v-model="status"
         height="75%"
+        content-class="appointment-sheet"
     >
-        <v-card class="rounded-xl">
+        <v-card class="rounded-t-xl rounded-b-0">
             <template #append>
                 <div class="d-flex ga-2 align-center mt-2 mr-2">
                     <template v-if="props.modo_admin">
@@ -55,7 +56,7 @@
                 </v-card-text>
             </section>
             <v-divider :thickness="3"/>
-            <v-card-actions v-if="props.modo_google" class="pa-4 pt-0 mb-2">
+            <v-card-actions v-if="props.modo_google" class="pa-4 mt-4 pt-0 mb-2">
                 <v-btn 
                     color="primary"
                     variant="flat" 
@@ -72,52 +73,59 @@
 </template>
 <script lang="ts" setup>
 import type ShowAppointment from "~~/shared/types/showAppointment";
-import type Appointment from "~~/shared/types/appointment";
-
 import { useAuthStore } from "~/stores/auth";
 import { useLoaderStore } from "~/stores/loader";
-import type GoogleTokens from "~~/shared/types/googleTokens";
+import convertToISODate from "~/utils/convertToISODate";
 
 const { $toast } = useNuxtApp();
 const props = defineProps<ShowAppointment>();
 const auth = useAuthStore();
+const { accessToken } = storeToRefs(auth);
 const loader = useLoaderStore();
 const emit = defineEmits(['close', 'edit', 'delete']);
 
 const status = ref(false);
 status.value = props.show;
 
-const googleCalendar = useGoogleCalendar();
-
 async function moveToGoogleCalendar() {
-    loader.startLoading();
-    emit("close");
-    const response: any = await googleCalendar.createTaskIntoCalendar({
-        id_agendamento: props.id_agendamento,
-        id_usuario: props.id_paciente,
-        titulo: props.titulo,
-        descricao: props.descricao,
-        data: props.data,
-        medico: props.medico,
-        local: props.local,
-        lembrete_enviado: props.lembrete_enviado
-    } as Appointment);
+  loader.startLoading();
+  emit("close");
+  const start = convertToISODate(props.data);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
 
-    if(response.status == 200) {
-        $toast.success("Agendamento criado.");
-        const newTokens: any = response.data.tokens;
-        if('access_token' in newTokens) {
-            auth.googleTokens = {
-                access_token: newTokens.access_token as string,
-                id_token: newTokens.id_token as string,
-                refresh_token: newTokens.refresh_token as string
-            } as GoogleTokens;
-        }
-        loader.endLoading();
-        return;
+  const event = {
+    summary: props.titulo,
+    location: props.local,
+    description: `${props.descricao}, Médico: ${props.medico}`,
+    start: { dateTime: start.toISOString(), timeZone: 'America/Sao_Paulo' },
+    end: { dateTime: end.toISOString(), timeZone: 'America/Sao_Paulo' },
+    colorId: '6',
+  };
+
+  const response: any = await $fetch.raw(
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event),
     }
+  );
 
-    $toast.error("Erro ao criar agendamento.");
+  if (response.status === 401) {
+    $toast.error("Erro ao exportar agendamento.");
     loader.endLoading();
+    throw new Error('TOKEN_EXPIRED');
+  }
+  if (!response.ok) {
+    $toast.error("Erro ao exportar agendamento.");
+    loader.endLoading();
+    throw new Error(`Calendar API error: ${response.status}`);
+  }
+
+  $toast.success("Agendamento criado.");
+  loader.endLoading();
 }
 </script>

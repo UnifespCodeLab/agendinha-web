@@ -39,8 +39,8 @@
           <section v-if="noAppointments">
             <p class="text-center">Sem compromissos nas próximas semanas.</p>
           </section>
-          <section v-else>
-            <section v-if="weekAppointments.length > 0" class="scroll">
+          <section v-else class="scroll">
+            <section v-if="weekAppointments.length > 0">
               <p class="mb-2">
                 {{ statusMessage.begin }}
                 <span class="text-blue-dark font-weight-bold">{{
@@ -48,15 +48,17 @@
                 }}</span>
                 {{ statusMessage.end }} para esta semana.
               </p>
-              <section class="scroll">
-                <appointment-card-generator :appointments="weekAppointments" @request-details="(appointment: Appointment) => requestDetails(appointment)" />
-              </section>
+              <appointment-card-generator
+                :appointments="weekAppointments"
+                @request-details="(appointment: Appointment) => requestDetails(appointment)"
+              />
             </section>
             <section v-if="futureAppointments.length > 0">
               <p class="mt-4 mb-4">Compromissos futuros</p>
-              <section class="scroll">
-                <appointment-card-generator :appointments="futureAppointments" @request-details="(appointment: Appointment) => requestDetails(appointment)" />
-              </section>
+              <appointment-card-generator
+                :appointments="futureAppointments"
+                @request-details="(appointment: Appointment) => requestDetails(appointment)"
+              />
             </section>
           </section>
         </v-tabs-window-item>
@@ -92,18 +94,17 @@
         :medico="selectedAppointment.medico"
         :data="selectedAppointment.data"
         :local="selectedAppointment.local"
-        :id_paciente="selectedAppointment.id_usuario"
         :nome_paciente="selectedAppointment.nome_paciente"
         :lembrete_enviado="selectedAppointment.lembrete_enviado"
         :show="showAppointmentDetails"
-        :modo_google="auth.googleTokens.access_token != undefined"
+        :modo_google="auth.accessToken != undefined"
         @close="showAppointmentDetails = !showAppointmentDetails"
       />
     </div>
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 import type Appointment from "~~/shared/types/appointment";
 import convertToISODate from "~/utils/convertToISODate";
 import moment from "moment";
@@ -112,16 +113,14 @@ import type CalendarAttributes from "~~/shared/types/calendarAttributes";
 import type CalendarDay from "~~/shared/types/calendarDay";
 import { useAuthStore } from "~/stores/auth";
 
-definePageMeta({ 
-  middleware: "auth", 
-  showHeader: true,
-  requiresRole: "ROLE_USER"
-});
-</script>
-
-<script lang="ts">
 export default defineComponent({
   name: "Home",
+  setup() {
+    definePageMeta({ 
+      showHeader: true,
+      requiresRole: "ROLE_USER"
+    });
+  },
   data() {
     return {
       loader: useLoaderStore(),
@@ -281,8 +280,9 @@ export default defineComponent({
 
 <style scoped>
 .scroll {
-  overflow-y: scroll;
-  height: 400px;
+  overflow-y: auto;
+  max-height: calc(100dvh - 220px);
+  padding-bottom: 80px;
 }
 
 .calendar {

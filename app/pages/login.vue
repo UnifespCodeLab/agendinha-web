@@ -16,11 +16,11 @@
           class="font-weight-bold ml-2">Fazer login</v-app-bar-title>
       </template>
     </v-app-bar>
-    <v-main class="d-flex flex-column ga-2">
+    <v-main class="d-flex flex-column ga-2 w-100 align-center">
       <p class="font-weight-bold text-h6 mb-3">Insira seus dados</p>
-      <section>
+      <section class="content">
         <v-text-field 
-          v-model="user.email" 
+          v-model="user.email"
           prepend-inner-icon="mdi-email-outline"
           label="E-mail" />
         <v-text-field
@@ -32,21 +32,15 @@
           @click:append-inner="show = !show"
         />
       </section>
-        <NuxtLink href="/pedido-alteracao-senha" class="font-weight-bold mb-4 text-blue-dark"
+      <NuxtLink href="/pedido-alteracao-senha" class="font-weight-bold mb-4 text-blue-dark"
         >Esqueci minha senha</NuxtLink
       >
-      <v-btn @click="login">Entrar</v-btn>
+      <v-btn class="content" @click="login">Entrar</v-btn>
       <p class="text-center">ou</p>
       <v-btn color="black" width="250" class="align-self-center" variant="outlined" @click="loginWithGoogle">
         <Icon class="mr-4" name="icons:google-logo" size="30" />
         Entrar com o Google
       </v-btn>
-      <div class="text-center mt-6">
-        <p>Ainda não tem uma conta?</p>
-        <NuxtLink href="/registro" class="font-weight-bold mb-6 text-blue-dark">
-          Cadastre-se aqui.
-        </NuxtLink>
-      </div>
     </v-main>
   </v-container>
 </template>
@@ -72,9 +66,8 @@ export default defineComponent({
   },
   methods: {
     loginWithGoogle() {
-      this.loader.startLoading();
       this.auth.authenticateUserGoogle(
-        async (status: number, confirmUser: boolean) => {
+        async (status: number, data: any) => {
           if(status == 403) {
             this.toast.error("Este e-mail já foi criado sem o login via Google. Use outro.");
             this.loader.endLoading();
@@ -82,16 +75,17 @@ export default defineComponent({
           }
           
           if(status != 200) {
-            this.toast.error("Erro ao fazer login.");
+            this.toast.error(data.message);
             this.loader.endLoading();
             return;
           }
-          
+
+          this.loader.endLoading();
+          if(this.auth.user.role == "ROLE_ADMIN") this.$router.push("/admin");
+          else this.$router.push("/");
+
           const permission = await Notification.requestPermission();
           if(permission == 'granted') await usePush(this.auth.user.id_usuario);
-
-          this.$router.push(confirmUser ? "/" : "/completar-informacoes");
-          this.loader.endLoading();
         }
       );
     },
@@ -110,9 +104,10 @@ export default defineComponent({
         return;        
       }
 
-      const status = await this.auth.authenticateUser(this.user);
+      const { status, data } = await this.auth.authenticateUser(this.user);
 
       if (status == 200) {
+        this.loader.endLoading();
         if(this.auth.user.role == "ROLE_ADMIN") this.$router.push("/admin");
         else this.$router.push("/");
         const permission = await Notification.requestPermission();
@@ -122,7 +117,7 @@ export default defineComponent({
       }
 
       if (status == 401 || status == 400) {
-        this.toast.error("E-mail/senha não encontrado.");
+        this.toast.error(data.error);
         this.loader.endLoading();
         return;
       }
@@ -139,3 +134,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.content {
+  min-width: 350px;
+}
+</style>

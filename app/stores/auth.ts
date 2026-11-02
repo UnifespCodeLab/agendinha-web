@@ -1,20 +1,20 @@
 import type UserToken from "~~/shared/types/userToken";
 import type UserAuth from "~~/shared/types/userAuth";
-import type NotificationType from "~~/shared/types/notification";
-import type GoogleTokens from "~~/shared/types/googleTokens";
-import type UserGoogleAuth from "~~/shared/types/userGoogleAuth";
+import type Notification from "~~/shared/types/notification";
 import { googleSdkLoaded } from "vue3-google-login";
 import type { User } from "~~/shared/types/user";
+import { useLoaderStore } from "~/stores/loader";
+
 type Callback = (status: number, data: any) => void;
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: {} as User,
     authenticated: false,
-    notifications: [] as NotificationType[],
+    notifications: [] as Notification[],
     notReadNotifications: 0, 
     page: '/',
-    googleTokens: {} as GoogleTokens,
+    accessToken: '' as string,
   }),
   actions: {
     async refreshAuth() {
@@ -32,18 +32,18 @@ export const useAuthStore = defineStore("auth", {
         const data = info.data;
 
         this.notifications = data.notificacoes;
-        Object.assign(this.user, data.usuario);
+        this.user = data.usuario;
         this.authenticated = true;
 
         if(!data.usuario.cadastro_confirmado) return { status: 403 };
 
-        const notReadNotifications: NotificationType[] = this.notifications.filter(
-          (notification) => !notification.lida,
+        const notReadNotifications: Notification[] = this.notifications.filter(
+          (notification: Notification) => !notification.lida,
         );
 
         this.notReadNotifications = notReadNotifications.length;
       } catch(error: any) {
-        console.error(error.status);
+        console.error("refreshAuth failed:", error?.statusCode, error?.message, error?.data);
         return { status: error.status };
       }
       return { status: 200 };
@@ -63,91 +63,64 @@ export const useAuthStore = defineStore("auth", {
         this.notifications = data.notificacoes;
       }
       
-      return response.status;
+      return { status: response.status, data: response.data };
     },
     async authenticateUserGoogle(endRequest: Callback) {
       const config = useRuntimeConfig();
       const { $api } = useNuxtApp();
-      
+      const loader = useLoaderStore();
+    
       googleSdkLoaded((google) => {
         google.accounts.oauth2.initCodeClient({
           client_id: config.public.googleClientId,
-          scope: 'email profile openid',
+          scope: 'email profile openid https://www.googleapis.com/auth/calendar.events',
+          ux_mode: 'popup',
           callback: async (response: any) => {
+            if (response.error || !response.code) {
+              endRequest(400, { data: { message: 'Login com Google cancelado' } });
+              return;
+            }
+    
             let responseCode;
-
-            const tokens: any = await $fetch(
-              "https://oauth2.googleapis.com/token",
-              {
+            loader.startLoading();
+    
+            try {
+              const login: any = await $api('/usuarios/login/google', {
                 method: "POST",
-                body: JSON.stringify({
+                body: {
                   code: response.code,
-                  client_id: config.public.googleClientId,
-                  client_secret: config.public.googleClientSecret,
-                  redirect_uri: "postmessage",
-                  grant_type: "authorization_code",
-                }),
-              },
-            );
-                    
-            if(!tokens.access_token || !tokens.id_token) {
-              responseCode = 400;
-              endRequest(responseCode, {});
-              return;
-            }
-
-            const info: any = await $fetch(
-              "https://www.googleapis.com/oauth2/v3/userinfo",
-              {
-                headers: {
-                  Authorization: `Bearer ${tokens.access_token}`,
                 },
-              },
-            );
-
-            if(!info.email) {
-              responseCode = 400;
-              endRequest(responseCode, {});
-              return;
+              });
+    
+              responseCode = login.status;
+              const data = login.data;
+    
+              const token = useCookie("token");
+              token.value = data.token;
+    
+              this.user = data.usuario;
+              this.notifications = data.notificacoes;
+              this.accessToken = data.google_access_token ?? null;
+    
+              endRequest(responseCode, { data });
+            } catch (err: any) {
+              endRequest(err?.statusCode ?? err?.status ?? 500, {
+                data: { message: err?.data?.message ?? 'Erro ao autenticar com o Google' },
+              });
+            } finally {
+              loader.endLoading();
             }
-            
-            const auth: UserGoogleAuth = {
-              token: tokens.id_token as string,
-              email: info.email as string
-            }
-
-            const login: any = await $api('/usuarios/login/google', {
-              method: "POST",
-              body: auth,
-            });
-
-            responseCode = login.status;
-
-            const loginData = login.data;
-
-            endRequest(responseCode, {
-              tokens,
-              loginRequest: loginData 
-            });
-
-            const token = useCookie("token");
-            token.value = loginData.token;
-
-            this.user = loginData.usuario;
-            this.googleTokens = tokens;
-            
-            if(!this.user.cadastro_confirmado) endRequest(responseCode, false);
-            else {
-              this.notifications = loginData.notificacoes;
-              endRequest(responseCode, true);
-            }
-          }
+          },
+          error_callback: () => {
+            endRequest(400, { data: { message: 'Não foi possível abrir o login do Google' } });
+          },
         }).requestCode();
       });
     },
     logout() {
       const token = useCookie("token");
       this.authenticated = false;
+      this.user = {} as User;
       token.value = null;
     },
   },
