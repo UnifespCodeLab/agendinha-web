@@ -11,7 +11,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     loader.startLoading();
     await auth.refreshAuth();
     loader.endLoading();
-    return;
   }
 
   const requiredRole = to.meta.requiresRole as string | string[] | undefined;
@@ -21,24 +20,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const target = firstTime.value === "false" ? "/login" : "/boas-vindas";
 
     if (to.path !== target) return navigateTo(target);
-    return;
   }
 
-  if (requiredRole) {
-    if (!user.value.id_usuario) {
-      const firstTime = useCookie("firsttime");
-      const target = firstTime.value === "false" ? "/login" : "/boas-vindas";
-
-      if (to.path !== target) return navigateTo(target);
-      return;
-    }
-
+  if (token.value && requiredRole) {
     const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
     if (!allowedRoles.includes(user.value.role)) {
       const target = user.value.role == "ROLE_ADMIN" ? "/admin" : "/";
-      if (to.path !== target) return navigateTo(target);
-      return;
+      return navigateTo(target);
     }
   }
+
 });

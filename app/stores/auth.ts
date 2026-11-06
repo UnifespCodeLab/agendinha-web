@@ -2,7 +2,7 @@ import type UserToken from "~~/shared/types/userToken";
 import type UserAuth from "~~/shared/types/userAuth";
 import type Notification from "~~/shared/types/notification";
 import { googleSdkLoaded } from "vue3-google-login";
-import type { User } from "~~/shared/types/user";
+import { type User } from "~~/shared/types/user";
 import { useLoaderStore } from "~/stores/loader";
 
 type Callback = (status: number, data: any) => void;
