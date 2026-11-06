@@ -37,7 +37,7 @@ const { user } = storeToRefs(auth);
 const { $toast } = useNuxtApp();
 const router = useRouter();
 
-definePageMeta({ middleware: "auth", requiresRole: "ROLE_USER" });
+definePageMeta({ requiresRole: "ROLE_USER" });
 
 const formUser = {
   nomeResponsavel: ref(user.value.nome as string),
