@@ -3,35 +3,52 @@
     <v-app-bar>
       <template #prepend>
         <v-app-bar-title
-          class="font-weight-bold ml-2">Criar usuário</v-app-bar-title>
+          class="font-weight-bold ml-2">Gerenciar usuários</v-app-bar-title>
       </template>
     </v-app-bar>
     <v-main>
-      <v-mask-input
-        v-model="user.cpf"
-        prepend-inner-icon="mdi-badge-account-horizontal-outline"
-        label="CPF"
-        mask="###.###.###-##"
-      />
-      <v-text-field 
-        v-model="user.email" 
-        prepend-inner-icon="mdi-email-outline"
-        label="E-mail"
-        />
-      <v-text-field 
-        v-model="user.nome" 
-        prepend-inner-icon="mdi-account-outline"
-        label="Nome"
-        />
-      <v-text-field
-        v-model="user.senha"
-        prepend-inner-icon="mdi-form-textbox-password"
-        label="Senha"
-        :type="show ? 'text' : 'password'"
-        :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-        @click:append-inner="show = !show"
-      />
-      <v-btn class="w-100" @click="register()">Criar conta</v-btn>
+      <v-tabs v-model="tab">
+        <v-tab class="w-50" color="black" value="list">
+          <p class="font-weight-bold">Lista</p>
+        </v-tab>
+        <v-tab class="w-50" color="black" value="create">
+          <p class="font-weight-bold">Cadastrar</p>
+        </v-tab>
+      </v-tabs>
+      <v-tabs-window v-model="tab" class="px-3">
+        <v-tabs-window-item value="list">
+          <user-card-generator 
+
+          />
+        </v-tabs-window-item>
+        <v-tabs-window-item value="create">
+          <v-mask-input
+            v-model="user.cpf"
+            prepend-inner-icon="mdi-badge-account-horizontal-outline"
+            label="CPF"
+            mask="###.###.###-##"
+          />
+          <v-text-field 
+            v-model="user.email" 
+            prepend-inner-icon="mdi-email-outline"
+            label="E-mail"
+            />
+          <v-text-field 
+            v-model="user.nome" 
+            prepend-inner-icon="mdi-account-outline"
+            label="Nome"
+            />
+          <v-text-field
+            v-model="user.senha"
+            prepend-inner-icon="mdi-form-textbox-password"
+            label="Senha"
+            :type="show ? 'text' : 'password'"
+            :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append-inner="show = !show"
+          />
+          <v-btn class="w-100" @click="register()">Criar conta</v-btn>
+        </v-tabs-window-item>
+      </v-tabs-window>
     </v-main>
   </v-container>
 </template>
@@ -39,6 +56,7 @@
 <script lang="ts">
 import { useLoaderStore } from "~/stores/loader";
 import type UserRegister from "~~/shared/types/userRegister";
+import { type User } from "~~/shared/types/user";
 import { useAuthStore } from "~/stores/auth";
 
 export default defineComponent({
@@ -56,37 +74,41 @@ export default defineComponent({
         senha: "",
         cpf: "",
       } as UserRegister),
+      users: ref([] as User[]),
       show: false,
       loader: useLoaderStore(),
-      toast: useNuxtApp().$toast as any,
       auth: useAuthStore(),
+      tab: ref(null),
     };
+  },
+  mounted() {
+    
   },
   methods: {
     async register() {
       this.loader.startLoading();
+      const { $toast, $api } = useNuxtApp();
 
       const testEmail =
         /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
       
       if (!testEmail.test(this.user.email)) {
-        this.toast.error("E-mail inválido.");
+        $toast.error("E-mail inválido.");
         this.loader.endLoading();
         return;
       }
 
       if(this.user.cpf.length != 11) {
-        this.toast.error("CPF inválido.");
+        $toast.error("CPF inválido.");
         this.loader.endLoading();
         return;
       }
 
       if (this.user.senha.length <= 0) {
-        this.toast.error("Senha inválida.");
+        $toast.error("Senha inválida.");
         this.loader.endLoading();
         return;
       }
-      const { $api } = useNuxtApp();
       this.user.cpf = this.user.cpf.replace(/[^0-9]/g, ''); 
       const token = useCookie("token");
       const response: any = await $api(
@@ -100,13 +122,13 @@ export default defineComponent({
         }
       );
       if(response.status == 200) {
-        this.toast.success("E-mail de cadastro enviado.");
+        $toast.success("E-mail de cadastro enviado.");
         this.user.email = '';
         this.user.nome = '';
         this.user.senha = '';
         this.user.cpf = '';
       }
-      else this.toast.error("Erro ao fazer o cadastro.");
+      else $toast.error("Erro ao fazer o cadastro.");
 
       this.loader.endLoading();
     },

@@ -7,7 +7,7 @@ export const useNotification = () => {
   const getPatientNotifications = async (
     user_id: number,
   ): Promise<NotificationType[]> => {
-    const response = await $fetch<{ data: Notification[] }>(
+    const response = await $fetch.raw<{ data: Notification[] }>(
       `${config.public.apiBase}/notificacoes/usuario/${user_id}`,
       {
         method: "GET",
@@ -17,7 +17,7 @@ export const useNotification = () => {
       },
     );
 
-    return response.data;
+    return await response.json();
   };
 
   const markNotificationAsRead = async (id_notificacao: number) => {
