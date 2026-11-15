@@ -1,6 +1,6 @@
 export interface User {
   id_usuario: number;
-  cpf?: string;
+  telefone?: string;
   nome: string;
   email: string;
   cadastro_confirmado: boolean;

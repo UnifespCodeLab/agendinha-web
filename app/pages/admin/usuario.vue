@@ -15,7 +15,7 @@
           <p class="font-weight-bold">Cadastrar</p>
         </v-tab>
       </v-tabs>
-      <v-tabs-window v-model="tab" class="px-3">
+      <v-tabs-window v-model="tab" class="px-3 h-full">
         <v-tabs-window-item value="list">
           <div v-if="loader.isLoading" class="d-flex justify-center py-6">
             Carregando...
@@ -25,13 +25,13 @@
           </p>
           <UserCardGenerator v-else :users="users" />
         </v-tabs-window-item>
-        <v-tabs-window-item value="create">
+        <v-tabs-window-item value="create" class="h-full">
           <v-mask-input
-            v-model="user.cpf"
-            prepend-inner-icon="mdi-badge-account-horizontal-outline"
+            v-model="user.telefone"
+            prepend-inner-icon="mdi-phone"
             class="mt-4"
-            label="CPF"
-            mask="###.###.###-##"
+            label="Telefone"
+            mask="(##) #####-####"
           />
           <v-text-field 
             v-model="user.email" 
@@ -78,7 +78,7 @@ export default defineComponent({
         email: "",
         nome: "",
         senha: "",
-        cpf: "",
+        telefone: ""
       } as UserRegister),
       users: ref([] as User[]),
       show: false,
@@ -102,7 +102,6 @@ export default defineComponent({
           },
           query: { page_size: 100 },
         });
-
         this.users = response.data.results;
       } catch (e) {
         $toast.error("Não foi possível carregar os usuários.");
@@ -123,8 +122,9 @@ export default defineComponent({
         return;
       }
 
-      if(this.user.cpf.length != 11) {
-        $toast.error("CPF inválido.");
+      const regexTelefoneBR = /^(?:\+?55\s?)?(?:\(?[1-9][0-9]\)?\s?)?(?:9\d{4}|[2-5]\d{3})-?\d{4}$/;
+      if(!regexTelefoneBR.test(this.user.telefone)) {
+        $toast.error("Telefone inválido.");
         this.loader.endLoading();
         return;
       }
@@ -134,7 +134,8 @@ export default defineComponent({
         this.loader.endLoading();
         return;
       }
-      this.user.cpf = this.user.cpf.replace(/[^0-9]/g, ''); 
+
+      this.user.telefone = this.user.telefone.replace(/[^0-9]/g, ''); 
       const token = useCookie("token");
       const response: any = await $api(
         "/admin/usuarios/registrar",
@@ -151,7 +152,7 @@ export default defineComponent({
         this.user.email = '';
         this.user.nome = '';
         this.user.senha = '';
-        this.user.cpf = '';
+        this.user.telefone = '';
       }
       else $toast.error("Erro ao fazer o cadastro.");
 

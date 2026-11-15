@@ -12,7 +12,7 @@
       :subtitle="`${user.email}`"
     >
       <v-card-item>
-        <span class="text-label-medium">{{ formatCPF(user.cpf!) }}</span>
+        <span class="text-label-medium">{{ user.telefone ? formatPhoneNumber(user.telefone) : '' }}</span>
       </v-card-item>
       <template #title>
         <span class="font-weight-bold text-wrap">
@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { type User } from "~~/shared/types/user";
-import formatCPF from "~/utils/formatCPF";
+import formatPhoneNumber from "~/utils/formatPhoneNumber";
 
 defineProps({
   users: {
