@@ -8,14 +8,17 @@
     </v-app-bar>
     <v-main>
       <v-tabs v-model="tab">
-        <v-tab class="w-50" color="black" value="list">
+        <v-tab class="w-1/3" color="black" value="list">
           <p class="font-weight-bold">Lista</p>
         </v-tab>
-        <v-tab class="w-50" color="black" value="create">
-          <p class="font-weight-bold">Cadastrar</p>
+        <v-tab class="w-1/3" color="black" value="create-user">
+          <p class="font-weight-bold">Novo Usuário</p>
+        </v-tab>
+        <v-tab class="w-1/3" color="black" value="create-guardian">
+          <p class="font-weight-bold">Novo Responsável</p>
         </v-tab>
       </v-tabs>
-      <v-tabs-window v-model="tab" class="px-3 h-full">
+      <v-tabs-window v-model="tab" class="px-3 h-full mt-6">
         <v-tabs-window-item value="list">
           <div v-if="loader.isLoading" class="d-flex justify-center py-6">
             Carregando...
@@ -25,7 +28,45 @@
           </p>
           <UserCardGenerator v-else :users="users" />
         </v-tabs-window-item>
-        <v-tabs-window-item value="create" class="h-full">
+        <v-tabs-window-item value="create-user" class="h-full">
+          <v-switch
+            v-model="haveGuardian"
+            label="Associar a algum responsável"
+            class="ma-0 pa-0"
+            inset
+            density="compact"
+            hide-details
+          />
+          <v-autocomplete
+            v-if="haveGuardian"
+            v-model="selectedGuardian"
+            v-model:search="guardianSearch"
+            :items="foundGuardians"
+            :loading="searchingGuardians"
+            item-title="nome"
+            return-object
+            prepend-inner-icon="mdi-account-search"
+            label="Responsável"
+            placeholder="Buscar por nome..."
+            class="mt-4"
+            clearable
+            :hide-no-data="!guardianSearch || guardianSearch.length < 2"
+          >
+            <template #no-data>
+              <v-list-item>
+                <v-list-item-title v-if="searchingGuardians" class="d-flex align-center">
+                  <v-progress-circular indeterminate size="20" width="2" color="primary" class="mr-2" />
+                  Buscando responsáveis...
+                </v-list-item-title>
+                <v-list-item-title v-else>
+                  Nenhum responsável encontrado.
+                </v-list-item-title>
+              </v-list-item>
+            </template>
+            <template #item="{ props, item }">
+              <v-list-item v-bind="props" :subtitle="item.raw.email" />
+            </template>
+          </v-autocomplete>
           <v-mask-input
             v-model="user.telefone"
             prepend-inner-icon="mdi-phone-outline"
@@ -33,16 +74,16 @@
             label="Telefone"
             mask="(##) #####-####"
           />
-          <v-text-field 
-            v-model="user.email" 
+          <v-text-field
+            v-model="user.email"
             prepend-inner-icon="mdi-email-outline"
             label="E-mail"
-            />
-          <v-text-field 
-            v-model="user.nome" 
+          />
+          <v-text-field
+            v-model="user.nome"
             prepend-inner-icon="mdi-account-outline"
             label="Nome"
-            />
+          />
           <v-text-field
             v-model="user.senha"
             prepend-inner-icon="mdi-form-textbox-password"
@@ -51,7 +92,33 @@
             :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append-inner="show = !show"
           />
-          <v-btn class="w-100" @click="register()">Criar conta</v-btn>
+          <v-btn class="w-100" :loading="loader.isLoading" @click="register()">Criar conta</v-btn>
+        </v-tabs-window-item>
+        <v-tabs-window-item value="create-guardian">
+          <v-mask-input
+            v-model="guardian.telefone"
+            prepend-inner-icon="mdi-phone-outline"
+            class="mt-4"
+            label="Telefone"
+            mask="(##) #####-####"
+          />
+          <v-text-field
+            v-model="guardian.email"
+            prepend-inner-icon="mdi-email-outline"
+            label="E-mail"
+          />
+          <v-text-field
+            v-model="guardian.nome"
+            prepend-inner-icon="mdi-account-outline"
+            label="Nome"
+          />
+          <v-btn
+            class="w-100"
+            :loading="savingGuardian"
+            @click="registerGuardian()"
+          >
+            Criar responsável
+          </v-btn>
         </v-tabs-window-item>
       </v-tabs-window>
     </v-main>
@@ -63,33 +130,93 @@ import { useLoaderStore } from "~/stores/loader";
 import type UserRegister from "~~/shared/types/userRegister";
 import { type User } from "~~/shared/types/user";
 import { useAuthStore } from "~/stores/auth";
+import type GuardianRegister from "~~/shared/types/guardianRegister";
+
+const EMAIL_REGEX = /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+const PHONE_BR_REGEX =
+  /^(?:\+?55\s?)?(?:\(?[1-9][0-9]\)?\s?)?(?:9\d{4}|[2-5]\d{3})-?\d{4}$/;
 
 export default defineComponent({
   setup() {
-    definePageMeta({ 
+    definePageMeta({
       showHeader: true,
-      requiresRole: "ROLE_ADMIN"
+      requiresRole: "ROLE_ADMIN",
     });
   },
   data() {
     return {
-      user: ref({
+      user: {
         email: "",
         nome: "",
         senha: "",
-        telefone: ""
-      } as UserRegister),
-      users: ref([] as User[]),
+        telefone: "",
+      } as UserRegister,
+      guardian: {
+        email: "",
+        nome: "",
+        telefone: "",
+      } as GuardianRegister,
+      haveGuardian: false,
+      selectedGuardian: null as any,
+      guardianSearch: "",
+      foundGuardians: [] as any[],
+      searchingGuardians: false,
+      guardianSearchTimeout: null as ReturnType<typeof setTimeout> | null,
+      savingGuardian: false,
+      users: [] as User[],
       show: false,
       loader: useLoaderStore(),
       auth: useAuthStore(),
-      tab: ref(null),
+      tab: "list" as string | null,
     };
+  },
+  watch: {
+    guardianSearch(val: string | null) {
+      if (this.guardianSearchTimeout) clearTimeout(this.guardianSearchTimeout);
+
+      if (this.selectedGuardian && val === this.selectedGuardian.nome) return;
+
+      if (!val || val.length < 2) {
+        this.foundGuardians = [];
+        this.searchingGuardians = false;
+        return;
+      }
+
+      this.searchingGuardians = true;
+
+      this.guardianSearchTimeout = setTimeout(async () => {
+        const { $api } = useNuxtApp();
+        const token = useCookie("token");
+        try {
+          const res: any = await $api("/responsaveis/pesquisar", {
+            method: "GET",
+            query: { nome: val },
+            headers: { Authorization: `Bearer ${token.value}` },
+          });
+          this.foundGuardians = res.data || [];
+        } catch {
+          this.foundGuardians = [];
+        }
+        this.searchingGuardians = false;
+      }, 500);
+    },
+    haveGuardian(val: boolean) {
+      if (!val) this.clearGuardianSelection();
+    },
   },
   async mounted() {
     await this.loadUsers();
   },
+  beforeUnmount() {
+    if (this.guardianSearchTimeout) clearTimeout(this.guardianSearchTimeout);
+  },
   methods: {
+    clearGuardianSelection() {
+      this.selectedGuardian = null;
+      this.guardianSearch = "";
+      this.foundGuardians = [];
+    },
+
     async loadUsers() {
       const { $toast, $api } = useNuxtApp();
       const token = useCookie("token");
@@ -97,7 +224,7 @@ export default defineComponent({
       try {
         const response = await $api("/admin/usuarios", {
           headers: {
-            Authorization: `Bearer ${token.value}`, // adjust to how you store the JWT
+            Authorization: `Bearer ${token.value}`,
           },
           query: { page_size: 100 },
         });
@@ -108,54 +235,118 @@ export default defineComponent({
         this.loader.endLoading();
       }
     },
+
     async register() {
-      this.loader.startLoading();
       const { $toast, $api } = useNuxtApp();
 
-      const testEmail =
-        /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-      
-      if (!testEmail.test(this.user.email)) {
+      if (!EMAIL_REGEX.test(this.user.email)) {
         $toast.error("E-mail inválido.");
-        this.loader.endLoading();
         return;
       }
 
-      const regexTelefoneBR = /^(?:\+?55\s?)?(?:\(?[1-9][0-9]\)?\s?)?(?:9\d{4}|[2-5]\d{3})-?\d{4}$/;
-      if(!regexTelefoneBR.test(this.user.telefone)) {
+      if (!PHONE_BR_REGEX.test(this.user.telefone)) {
         $toast.error("Telefone inválido.");
-        this.loader.endLoading();
         return;
       }
 
       if (this.user.senha.length <= 0) {
         $toast.error("Senha inválida.");
-        this.loader.endLoading();
         return;
       }
 
-      this.user.telefone = this.user.telefone.replace(/[^0-9]/g, ''); 
-      const token = useCookie("token");
-      const response: any = await $api(
-        "/admin/usuarios/registrar",
-        {
+      if (this.haveGuardian && !this.selectedGuardian) {
+        $toast.error("Selecione um responsável.");
+        return;
+      }
+
+      this.loader.startLoading();
+      try {
+        const token = useCookie("token");
+
+        const body: Record<string, any> = {
+          ...this.user,
+          telefone: this.user.telefone.replace(/[^0-9]/g, ""),
+        };
+
+        if (this.haveGuardian && this.selectedGuardian) {
+          body.id_responsavel = this.selectedGuardian.id_responsavel
+            ?? this.selectedGuardian.id_usuario
+            ?? this.selectedGuardian.id;
+        }
+
+        const response: any = await $api("/admin/usuarios/registrar", {
           method: "POST",
-          body: this.user,
+          body,
           headers: {
             Authorization: `Bearer ${token.value}`,
           },
-        }
-      );
-      if(response.status == 200) {
-        $toast.success("E-mail de cadastro enviado.");
-        this.user.email = '';
-        this.user.nome = '';
-        this.user.senha = '';
-        this.user.telefone = '';
-      }
-      else $toast.error("Erro ao fazer o cadastro.");
+        });
 
-      this.loader.endLoading();
+        if (response.status == 200) {
+          $toast.success("E-mail de cadastro enviado.");
+          this.user.email = "";
+          this.user.nome = "";
+          this.user.senha = "";
+          this.user.telefone = "";
+          this.haveGuardian = false; // também limpa a seleção via watcher
+          await this.loadUsers();
+        } else {
+          $toast.error("Erro ao fazer o cadastro.");
+        }
+      } catch (e) {
+        $toast.error("Erro ao fazer o cadastro.");
+      } finally {
+        this.loader.endLoading();
+      }
+    },
+
+    async registerGuardian() {
+      const { $toast, $api } = useNuxtApp();
+
+      if (!this.guardian.nome || this.guardian.nome.trim().length < 2) {
+        $toast.error("Nome inválido.");
+        return;
+      }
+
+      if (!EMAIL_REGEX.test(this.guardian.email)) {
+        $toast.error("E-mail inválido.");
+        return;
+      }
+
+      if (!PHONE_BR_REGEX.test(this.guardian.telefone)) {
+        $toast.error("Telefone inválido.");
+        return;
+      }
+
+      this.savingGuardian = true;
+      try {
+        const token = useCookie("token");
+
+        // ⚠️ Ajuste o endpoint conforme sua API
+        const response: any = await $api("/responsaveis/create", {
+          method: "POST",
+          body: {
+            ...this.guardian,
+            telefone: this.guardian.telefone.replace(/[^0-9]/g, ""),
+          },
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        });
+
+        if (response.status == 200 || response.status == 201) {
+          $toast.success("Responsável criado com sucesso.");
+          this.guardian.email = "";
+          this.guardian.nome = "";
+          this.guardian.telefone = "";
+        } else {
+          $toast.error("Erro ao criar responsável.");
+        }
+      } catch (e) {
+        $toast.error("Erro ao criar responsável.");
+      } finally {
+        this.savingGuardian = false;
+      }
     },
   },
 });

@@ -8,10 +8,14 @@
     </v-app-bar>
     <div class="mt-16 pt-2 w-100 mx-auto px-4">
       <v-tabs v-model="tab" grow color="primary">
-        <v-tab value="novo">Novo Agendamento</v-tab>
-        <v-tab value="calendario">Calendário</v-tab>
+        <v-tab value="novo" color="black">
+          <p class="font-weight-bold">Novo Agendamento</p>
+        </v-tab>
+        <v-tab value="calendario" color="black">
+          <p class="font-weight-bold">Calendário</p>
+        </v-tab>
       </v-tabs>
-      <v-tabs-window v-model="tab" class="mt-4">
+      <v-tabs-window v-model="tab" class="mt-4 h-full">
         <!-- NOVO AGENDAMENTO -->
         <v-tabs-window-item value="novo">
           <v-form ref="formRef" class="pt-2 pb-4" @submit.prevent="salvarAgendamento">
