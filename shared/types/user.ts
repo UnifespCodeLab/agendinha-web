@@ -5,7 +5,7 @@ export interface User {
   email: string;
   cadastro_confirmado: boolean;
   role: string;
-  foto_perfil: string | null;
+  foto_perfil?: string;
   ativar_notificacoes_consultas: boolean;
   ativar_notificacoes_agendinha: boolean;
 }

@@ -28,7 +28,7 @@
         <v-tabs-window-item value="create" class="h-full">
           <v-mask-input
             v-model="user.telefone"
-            prepend-inner-icon="mdi-phone"
+            prepend-inner-icon="mdi-phone-outline"
             class="mt-4"
             label="Telefone"
             mask="(##) #####-####"
@@ -62,7 +62,6 @@
 import { useLoaderStore } from "~/stores/loader";
 import type UserRegister from "~~/shared/types/userRegister";
 import { type User } from "~~/shared/types/user";
-import type UserListResponse from "~~/shared/types/userListResponse";
 import { useAuthStore } from "~/stores/auth";
 
 export default defineComponent({
