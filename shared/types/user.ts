@@ -1,3 +1,5 @@
+import type Guardian from "./guardian";
+
 export interface User {
   id_usuario: number;
   telefone?: string;
@@ -8,4 +10,5 @@ export interface User {
   foto_perfil?: string;
   ativar_notificacoes_consultas: boolean;
   ativar_notificacoes_agendinha: boolean;
+  responsavel?: Guardian;
 }
