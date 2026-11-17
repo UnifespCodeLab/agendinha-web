@@ -2,17 +2,18 @@
 
 ## Objetivo
 
-### *Gerais:*
+### _Gerais:_
 
 - Montar uma agenda em detalhes, a partir de um calendário;
 - Exibir informações sobre contatos de médicos e funcionários;
 - Marcar consultas e exames, tanto para pacientes quanto para profissionais.
 
-### *Específicos:*
+### _Específicos:_
 
 - Transferir dados de uma agenda para o dispositivo móvel de forma local ou em nuvem (ex.: Google Calendar).
 
 ## **Como Rodar o Projeto**
+
 **1.** Instale Node.js e npm;
 
 **2.** Clone o repositório e entre na pasta `agendinha-web`;
@@ -23,7 +24,7 @@
 
 **5.** Execute `npm run dev`;
 
-**6.** *(Opcional)* Para executar o back-end, entre neste ![repositório](https://github.com/UnifespCodeLab/agendinha-backend-simple).
+**6.** _(Opcional)_ Para executar o back-end, entre neste ![repositório](https://github.com/UnifespCodeLab/agendinha-backend-simple).
 
 ## **Protótipo**
 

@@ -2,20 +2,24 @@
   <v-container class="pa-0 h-100 position-fixed">
     <v-app-bar>
       <template #prepend>
-        <v-app-bar-title
-          class="font-weight-bold ml-2">
+        <v-app-bar-title class="font-weight-bold ml-2">
           Notificações
         </v-app-bar-title>
       </template>
     </v-app-bar>
     <v-main class="d-flex flex-column ga-4 mx-3 mt-3">
-      <section v-if="readNotifications.length > 0 || notReadNotifications.length > 0" class="scroll">
+      <section
+        v-if="readNotifications.length > 0 || notReadNotifications.length > 0"
+        class="scroll"
+      >
         <section v-if="notReadNotifications.length > 0">
           <p class="mb-4">Não Lidas</p>
           <NotificationGenerator
             :notifications="notReadNotifications"
             color="blue-light"
-            @request-details="(notification: Notification) => requestDetails(notification)"
+            @request-details="
+              (notification: Notification) => requestDetails(notification)
+            "
           />
         </section>
         <section v-if="readNotifications.length > 0">
@@ -23,7 +27,9 @@
           <NotificationGenerator
             :notifications="readNotifications"
             color="#F8F8F8"
-            @request-details="(notification: Notification) => requestDetails(notification)"
+            @request-details="
+              (notification: Notification) => requestDetails(notification)
+            "
           />
         </section>
       </section>
@@ -63,7 +69,7 @@ export default defineComponent({
       loader: useLoaderStore(),
       auth: storeToRefs(useAuthStore()),
       showNotificationDetails: ref(false),
-      selectedNotification: ref({} as Notification)
+      selectedNotification: ref({} as Notification),
     };
   },
   async mounted() {
@@ -71,14 +77,16 @@ export default defineComponent({
   },
   methods: {
     read() {
-      if(this.selectedNotification.lida) return;
+      if (this.selectedNotification.lida) return;
 
       const notifications = this.notReadNotifications.filter(
-        (notification) => notification.id_notificacao !== this.selectedNotification.id_notificacao
+        (notification) =>
+          notification.id_notificacao !==
+          this.selectedNotification.id_notificacao,
       );
 
       this.notReadNotifications = notifications;
-      
+
       this.selectedNotification.lida = true;
       this.readNotifications.push(this.selectedNotification);
 
@@ -93,21 +101,24 @@ export default defineComponent({
       const { $api } = useNuxtApp();
       const token = useCookie("token");
 
-      const response = await $api(`/notificacoes/usuario/${this.auth.user.id_usuario}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
+      const response = await $api(
+        `/notificacoes/usuario/${this.auth.user.id_usuario}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
         },
-      });
+      );
 
       const notifications: Notification[] = response.data ?? [];
 
-      if(notifications.length > 0) {
+      if (notifications.length > 0) {
         this.readNotifications = notifications.filter(
-          (notification) => notification.lida
+          (notification) => notification.lida,
         );
         this.notReadNotifications = notifications.filter(
-          (notification) => !notification.lida
+          (notification) => !notification.lida,
         );
       }
 
@@ -115,22 +126,26 @@ export default defineComponent({
       this.loader.endLoading();
     },
     deleteNotificationFromList() {
-      if(this.selectedNotification.lida) {
+      if (this.selectedNotification.lida) {
         const notifications = this.readNotifications.filter(
-          notification => notification.id_notificacao !== this.selectedNotification.id_notificacao
+          (notification) =>
+            notification.id_notificacao !==
+            this.selectedNotification.id_notificacao,
         );
         this.readNotifications = notifications;
         return;
       }
-      
+
       const notifications = this.notReadNotifications.filter(
-        notification => notification.id_notificacao !== this.selectedNotification.id_notificacao
+        (notification) =>
+          notification.id_notificacao !==
+          this.selectedNotification.id_notificacao,
       );
       this.notReadNotifications = notifications;
 
       this.auth.notReadNotifications = this.notReadNotifications.length;
-    }
-  }
+    },
+  },
 });
 </script>
 

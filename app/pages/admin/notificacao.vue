@@ -8,18 +8,22 @@
       </template>
     </v-app-bar>
     <div class="mt-16 pt-2 w-100 mx-auto px-4">
-      <v-form ref="formRef" class="pt-2 pb-4" @submit.prevent="salvarNotificacao">
+      <v-form
+        ref="formRef"
+        class="pt-2 pb-4"
+        @submit.prevent="salvarNotificacao"
+      >
         <v-row dense>
           <v-col cols="12">
             <v-switch
-                v-model="form.broadcast"
-                label="Enviar para todos os pacientes"
-                class="ma-0 pa-0" 
-                inset 
-                density="compact"
-                hide-details
-                />
-            </v-col>
+              v-model="form.broadcast"
+              label="Enviar para todos os pacientes"
+              class="ma-0 pa-0"
+              inset
+              density="compact"
+              hide-details
+            />
+          </v-col>
           <v-col cols="12">
             <v-autocomplete
               v-if="!form.broadcast"
@@ -36,12 +40,21 @@
               rounded="lg"
               :hide-no-data="!pesquisaPaciente || pesquisaPaciente.length < 2"
               clearable
-              :rules="[v => !!v || 'O paciente é obrigatório']"
+              :rules="[(v) => !!v || 'O paciente é obrigatório']"
             >
               <template #no-data>
                 <v-list-item>
-                  <v-list-item-title v-if="buscandoPacientes" class="d-flex align-center">
-                    <v-progress-circular indeterminate size="20" width="2" color="primary" class="mr-2" />
+                  <v-list-item-title
+                    v-if="buscandoPacientes"
+                    class="d-flex align-center"
+                  >
+                    <v-progress-circular
+                      indeterminate
+                      size="20"
+                      width="2"
+                      color="primary"
+                      class="mr-2"
+                    />
                     Buscando pacientes...
                   </v-list-item-title>
                   <v-list-item-title v-else>
@@ -59,7 +72,7 @@
               v-model="form.titulo"
               prepend-inner-icon="mdi-format-title"
               label="Título"
-              :rules="[v => !!v?.trim() || 'O título é obrigatório']"
+              :rules="[(v) => !!v?.trim() || 'O título é obrigatório']"
             />
           </v-col>
           <v-col cols="12">
@@ -71,7 +84,7 @@
               rounded="lg"
               rows="3"
               auto-grow
-              :rules="[v => !!v?.trim() || 'A descrição é obrigatória']"
+              :rules="[(v) => !!v?.trim() || 'A descrição é obrigatória']"
             />
           </v-col>
         </v-row>
@@ -89,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import type NotificationRegister from '~~/shared/types/notificationRegister';
+import type NotificationRegister from "~~/shared/types/notificationRegister";
 
 definePageMeta({ showHeader: true, requiresRole: "ROLE_ADMIN" });
 
@@ -132,12 +145,14 @@ const salvarNotificacao = async () => {
   salvando.value = true;
   try {
     const payload: NotificationRegister = {
-      id_usuario: form.value.paciente ? Number(form.value.paciente.id_usuario) : 0,
+      id_usuario: form.value.paciente
+        ? Number(form.value.paciente.id_usuario)
+        : 0,
       titulo: form.value.titulo,
       descricao: form.value.descricao,
     };
 
-    if(form.value.broadcast) delete payload.id_usuario;
+    if (form.value.broadcast) delete payload.id_usuario;
 
     const res: any = await $api("/notificacoes", {
       method: "POST",
@@ -151,7 +166,7 @@ const salvarNotificacao = async () => {
     } else {
       toast.error("Erro ao criar a notificação.");
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     toast.error("Erro ao criar a notificação.");
   } finally {

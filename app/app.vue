@@ -1,24 +1,19 @@
 <template>
   <NuxtLoadingIndicator />
-  <v-progress-circular 
-    v-if="loader.isLoading"
-    class="loading"
-    indeterminate />
+  <v-progress-circular v-if="loader.isLoading" class="loading" indeterminate />
   <v-app>
-    <NuxtPage
-      :class="{'overlay-loading': loader.isLoading }"
-    />
+    <NuxtPage :class="{ 'overlay-loading': loader.isLoading }" />
   </v-app>
-  <the-header v-if="$route.meta.showHeader"/>
+  <the-header v-if="$route.meta.showHeader" />
 </template>
 
 <script setup lang="ts">
-import { useLoaderStore } from './stores/loader';
+import { useLoaderStore } from "./stores/loader";
 
 const loader = useLoaderStore();
 
 useSeoMeta({
-  title: 'Agendinha',
+  title: "Agendinha",
 });
 </script>
 

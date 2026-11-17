@@ -13,7 +13,11 @@
       color="#E6F6FE"
       rounded="xl"
       class="card mb-2"
-      :subtitle="formatDate(convertToISODate(appointment.data)).weekday + ' - ' + appointment.nome_paciente"
+      :subtitle="
+        formatDate(convertToISODate(appointment.data)).weekday +
+        ' - ' +
+        appointment.nome_paciente
+      "
       :text="appointment.local"
     >
       <template #title>
@@ -23,8 +27,12 @@
       </template>
       <template #append>
         <v-icon
-        class="mt-6" color="blue-dark" size="35" 
-        icon="mdi-chevron-right" @click="$emit('requestDetails', appointment)"/>
+          class="mt-6"
+          color="blue-dark"
+          size="35"
+          icon="mdi-chevron-right"
+          @click="$emit('requestDetails', appointment)"
+        />
       </template>
     </v-card>
   </div>
@@ -38,10 +46,10 @@ defineProps({
   appointments: {
     type: Array as PropType<Appointment[]>,
     required: true,
-  }
+  },
 });
 
-defineEmits(['requestDetails']);
+defineEmits(["requestDetails"]);
 
 function formatDate(date: Date): any {
   const weekdays = [
@@ -69,7 +77,8 @@ function formatDate(date: Date): any {
   ];
 
   const formattedDate = date.toLocaleDateString("pt-BR");
-  const formattedTime = date.toLocaleTimeString("pt-BR", {
+  const formattedTime = date
+    .toLocaleTimeString("pt-BR", {
       hour: "2-digit",
       minute: "2-digit",
     })

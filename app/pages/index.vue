@@ -14,22 +14,31 @@
       <v-tabs v-model="tab">
         <v-tab class="w-50" color="black" value="appointment">
           <div class="tab-content d-flex align-center">
-            <Icon 
-              class="mr-2" 
-              :style="tab === 'appointment' ? 'transform: rotate(-10deg); transition: transform 0.3s ease;' 
-              : 'transform: none; transition: transform 0.3s ease;'"
-              name="icons:bookmark-icons" 
-              size="25" />
+            <Icon
+              class="mr-2"
+              :style="
+                tab === 'appointment'
+                  ? 'transform: rotate(-10deg); transition: transform 0.3s ease;'
+                  : 'transform: none; transition: transform 0.3s ease;'
+              "
+              name="icons:bookmark-icons"
+              size="25"
+            />
             <p class="font-weight-bold">Agendamentos</p>
           </div>
         </v-tab>
         <v-tab class="w-50" color="black" value="calendar">
           <div class="tab-content d-flex align-center">
-            <Icon 
+            <Icon
               class="mr-2"
-              :style="tab === 'calendar' ? 'transform: rotate(-10deg); transition: transform 0.3s ease;' 
-              : 'transform: none; transition: transform 0.3s ease;'"
-              name="icons:calendar" size="25" />
+              :style="
+                tab === 'calendar'
+                  ? 'transform: rotate(-10deg); transition: transform 0.3s ease;'
+                  : 'transform: none; transition: transform 0.3s ease;'
+              "
+              name="icons:calendar"
+              size="25"
+            />
             <p class="font-weight-bold">Calendário</p>
           </div>
         </v-tab>
@@ -50,14 +59,18 @@
               </p>
               <appointment-card-generator
                 :appointments="weekAppointments"
-                @request-details="(appointment: Appointment) => requestDetails(appointment)"
+                @request-details="
+                  (appointment: Appointment) => requestDetails(appointment)
+                "
               />
             </section>
             <section v-if="futureAppointments.length > 0">
               <p class="mt-4 mb-4">Compromissos futuros</p>
               <appointment-card-generator
                 :appointments="futureAppointments"
-                @request-details="(appointment: Appointment) => requestDetails(appointment)"
+                @request-details="
+                  (appointment: Appointment) => requestDetails(appointment)
+                "
               />
             </section>
           </section>
@@ -67,18 +80,23 @@
             <ClientOnly>
               <component
                 :is="'NewCalendar'"
-                locale="pt-BR" 
+                locale="pt-BR"
                 expanded
                 borderless
                 transparent
-                :attributes='attributes'
+                :attributes="attributes"
                 @dayclick="onDayClick"
               />
             </ClientOnly>
           </section>
           <section v-if="dayAppointments.length > 0" class="scroll">
             <p class="mt-4 mb-4">Compromissos marcados nesse dia</p>
-            <appointment-card-generator :appointments="dayAppointments" @request-details="(appointment: Appointment) => requestDetails(appointment)"/>
+            <appointment-card-generator
+              :appointments="dayAppointments"
+              @request-details="
+                (appointment: Appointment) => requestDetails(appointment)
+              "
+            />
           </section>
           <section v-else class="text-center mt-8">
             Nenhum compromisso nesse dia
@@ -116,9 +134,9 @@ import { useAuthStore } from "~/stores/auth";
 export default defineComponent({
   name: "Home",
   setup() {
-    definePageMeta({ 
+    definePageMeta({
       showHeader: true,
-      requiresRole: "ROLE_USER"
+      requiresRole: "ROLE_USER",
     });
   },
   data() {
@@ -129,27 +147,29 @@ export default defineComponent({
       dayAppointments: [] as Appointment[],
       allAppointments: ref([] as Appointment[]),
       searchedAppointments: ref([] as Appointment[]),
-      statusMessage: reactive({ 
+      statusMessage: reactive({
         begin: "Existem",
         middle: "0 compromissos",
         end: "agendados",
       }),
       tab: ref(null),
       noAppointments: ref(false),
-      attributes: ref<CalendarAttributes[]>([{
-        key: "today",
-        highlight: {
-          color: 'blue',
-          fillMode: 'light',
+      attributes: ref<CalendarAttributes[]>([
+        {
+          key: "today",
+          highlight: {
+            color: "blue",
+            fillMode: "light",
+          },
+          dates: new Date(),
         },
-        dates: new Date(),
-      }]),
-      search: ref(''),
+      ]),
+      search: ref(""),
       selectedDate: new Date(),
       showAppointmentDetails: ref(false),
       selectedAppointment: ref({} as Appointment),
       auth: useAuthStore(),
-    }
+    };
   },
   async mounted() {
     this.loader.startLoading();
@@ -163,23 +183,23 @@ export default defineComponent({
           Authorization: `Bearer ${token.value}`,
         },
       });
-      
+
       this.allAppointments = response.data ?? [];
-      if(this.allAppointments.length <= 0) {
+      if (this.allAppointments.length <= 0) {
         this.noAppointments = true;
         return;
       }
 
-      this.allAppointments.forEach((Appointment) => 
+      this.allAppointments.forEach((Appointment) =>
         this.attributes.push({
           key: Appointment.titulo,
           bar: {
             style: {
-              backgroundColor: '#E32585'
-            }
+              backgroundColor: "#E32585",
+            },
           },
           dates: convertToISODate(Appointment.data),
-        })
+        }),
       );
 
       this.updateAppointmentsList();
@@ -193,27 +213,33 @@ export default defineComponent({
   },
   methods: {
     updateAppointmentsList() {
-      this.weekAppointments = this.allAppointments.filter((appointment) => 
-        this.isDateInThisWeek(convertToISODate(appointment.data)) == 0
+      this.weekAppointments = this.allAppointments.filter(
+        (appointment) =>
+          this.isDateInThisWeek(convertToISODate(appointment.data)) == 0,
       );
 
       this.futureAppointments = this.allAppointments.filter(
-        (appointment) => this.isDateInThisWeek(convertToISODate(appointment.data)) == 1,
+        (appointment) =>
+          this.isDateInThisWeek(convertToISODate(appointment.data)) == 1,
       );
 
-      if(this.weekAppointments.length <= 0 && this.futureAppointments.length <= 0)
+      if (
+        this.weekAppointments.length <= 0 &&
+        this.futureAppointments.length <= 0
+      )
         this.noAppointments = true;
     },
     updateAppointmentsByDay() {
-      let compare = (appointment: Appointment) => this.compareDate(
-        convertToISODate(appointment.data), this.selectedDate
-      );
+      let compare = (appointment: Appointment) =>
+        this.compareDate(convertToISODate(appointment.data), this.selectedDate);
 
-      if(this.search.length > 0)
-        compare = (appointment: Appointment) => this.compareDate(
-          convertToISODate(appointment.data), this.selectedDate
-        ) && appointment.titulo.toLowerCase() == this.search.toLowerCase();
-      
+      if (this.search.length > 0)
+        compare = (appointment: Appointment) =>
+          this.compareDate(
+            convertToISODate(appointment.data),
+            this.selectedDate,
+          ) && appointment.titulo.toLowerCase() == this.search.toLowerCase();
+
       this.dayAppointments = this.allAppointments.filter(compare);
     },
     updateText() {
@@ -230,17 +256,17 @@ export default defineComponent({
       const now = moment();
       const currentDate = moment(date.toISOString());
 
-      if(now.isoWeek() == currentDate.isoWeek())
-        return 0;
-      else if(now.isoWeek() < currentDate.isoWeek())
-        return 1;
+      if (now.isoWeek() == currentDate.isoWeek()) return 0;
+      else if (now.isoWeek() < currentDate.isoWeek()) return 1;
 
       return -1;
     },
     compareDate(firstDate: Date, secondDate: Date): boolean {
-      return (firstDate.getDate() == secondDate.getDate())
-      && (firstDate.getMonth() == secondDate.getMonth()) &&
-      (firstDate.getFullYear() == secondDate.getFullYear());
+      return (
+        firstDate.getDate() == secondDate.getDate() &&
+        firstDate.getMonth() == secondDate.getMonth() &&
+        firstDate.getFullYear() == secondDate.getFullYear()
+      );
     },
     onDayClick(selectedDay: CalendarDay) {
       this.selectedDate = selectedDay.date;
@@ -251,21 +277,21 @@ export default defineComponent({
       this.updateText();
       this.updateAppointmentsByDay();
 
-      if(this.search.length <= 0) {
+      if (this.search.length <= 0) {
         this.updateText();
         return;
       }
 
-      this.weekAppointments = this.weekAppointments.filter(
-        (appointment) => appointment.titulo.toLowerCase().includes(this.search.toLowerCase())
+      this.weekAppointments = this.weekAppointments.filter((appointment) =>
+        appointment.titulo.toLowerCase().includes(this.search.toLowerCase()),
       );
 
-      this.futureAppointments = this.futureAppointments.filter(
-        (appointment) => appointment.titulo.toLowerCase().includes(this.search.toLowerCase())
+      this.futureAppointments = this.futureAppointments.filter((appointment) =>
+        appointment.titulo.toLowerCase().includes(this.search.toLowerCase()),
       );
 
-      this.dayAppointments = this.dayAppointments.filter(
-        (appointment) => appointment.titulo.toLowerCase().includes(this.search.toLowerCase())
+      this.dayAppointments = this.dayAppointments.filter((appointment) =>
+        appointment.titulo.toLowerCase().includes(this.search.toLowerCase()),
       );
 
       this.updateText();
@@ -273,7 +299,7 @@ export default defineComponent({
     requestDetails(appointment: Appointment) {
       this.showAppointmentDetails = !this.showAppointmentDetails;
       this.selectedAppointment = appointment;
-    }
+    },
   },
 });
 </script>
@@ -286,7 +312,7 @@ export default defineComponent({
 }
 
 .calendar {
-  background-color: #ECEDF4;
+  background-color: #ecedf4;
   border-radius: 30px;
 }
 </style>

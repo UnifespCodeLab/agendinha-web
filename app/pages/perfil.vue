@@ -2,8 +2,7 @@
   <v-container class="h-100 position-fixed">
     <v-app-bar>
       <template #prepend>
-        <v-app-bar-title
-          class="font-weight-bold ml-2">
+        <v-app-bar-title class="font-weight-bold ml-2">
           Perfil
         </v-app-bar-title>
       </template>
@@ -11,7 +10,11 @@
     <v-main class="text-center d-flex h-100 justify-space-between flex-column">
       <section class="d-flex flex-column ga-4">
         <client-only>
-          <profile-image :id="user.id_usuario || -1" :main-image="profileImageURL" :size="100" />
+          <profile-image
+            :id="user.id_usuario || -1"
+            :main-image="profileImageURL"
+            :size="100"
+          />
           <h3 style="color: #4b4b4b">{{ user.nome }}</h3>
         </client-only>
         <v-btn
@@ -42,7 +45,7 @@
       </p>
     </v-main>
     <div v-if="showDelete">
-      <delete-account 
+      <delete-account
         :show="showDelete"
         :user-id="user.id_usuario"
         @close="requestDelete"
@@ -56,13 +59,14 @@ import { useAuthStore } from "~/stores/auth";
 import { storeToRefs } from "pinia";
 const config = useRuntimeConfig();
 const showDelete = ref(false);
-definePageMeta({ requiresRole: 'ROLE_USER', showHeader: true });
+definePageMeta({ requiresRole: "ROLE_USER", showHeader: true });
 const auth = useAuthStore();
 const { user } = storeToRefs(auth);
-const profileImageURL: Ref<string | string> = ref('');
+const profileImageURL: Ref<string | string> = ref("");
 
-profileImageURL.value = user.value.foto_perfil ? 
-`${config.public.apiBase}${user.value.foto_perfil}` : 'no-image';
+profileImageURL.value = user.value.foto_perfil
+  ? `${config.public.apiBase}${user.value.foto_perfil}`
+  : "no-image";
 
 function logUserOut(): void {
   auth.logout();

@@ -2,8 +2,9 @@
   <v-container class="h-100 position-fixed">
     <v-app-bar>
       <template #prepend>
-        <v-app-bar-title
-          class="font-weight-bold ml-2">Gerenciar usuários</v-app-bar-title>
+        <v-app-bar-title class="font-weight-bold ml-2"
+          >Gerenciar usuários</v-app-bar-title
+        >
       </template>
     </v-app-bar>
     <v-main>
@@ -23,7 +24,10 @@
           <div v-if="loader.isLoading" class="d-flex justify-center py-6">
             Carregando...
           </div>
-          <p v-else-if="!users.length" class="text-center text-medium-emphasis py-6">
+          <p
+            v-else-if="!users.length"
+            class="text-center text-medium-emphasis py-6"
+          >
             Nenhum usuário encontrado.
           </p>
           <UserCardGenerator v-else :users="users" />
@@ -54,8 +58,17 @@
           >
             <template #no-data>
               <v-list-item>
-                <v-list-item-title v-if="searchingGuardians" class="d-flex align-center">
-                  <v-progress-circular indeterminate size="20" width="2" color="primary" class="mr-2" />
+                <v-list-item-title
+                  v-if="searchingGuardians"
+                  class="d-flex align-center"
+                >
+                  <v-progress-circular
+                    indeterminate
+                    size="20"
+                    width="2"
+                    color="primary"
+                    class="mr-2"
+                  />
                   Buscando responsáveis...
                 </v-list-item-title>
                 <v-list-item-title v-else>
@@ -94,7 +107,12 @@
             :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append-inner="show = !show"
           />
-          <v-btn class="w-100" :loading="loader.isLoading" @click="registerUser()">Criar conta</v-btn>
+          <v-btn
+            class="w-100"
+            :loading="loader.isLoading"
+            @click="registerUser()"
+            >Criar conta</v-btn
+          >
         </v-tabs-window-item>
         <v-tabs-window-item value="create-guardian" class="px-3 h-full">
           <v-mask-input
@@ -130,7 +148,7 @@
 <script lang="ts">
 import { useLoaderStore } from "~/stores/loader";
 import type UserRegister from "~~/shared/types/userRegister";
-import { type User } from "~~/shared/types/user";
+import type { User } from "~~/shared/types/user";
 import { useAuthStore } from "~/stores/auth";
 import type GuardianRegister from "~~/shared/types/guardianRegister";
 
@@ -234,7 +252,8 @@ export default defineComponent({
           query: { page_size: 100 },
         });
         this.users = response.data.results;
-      } catch (e) {
+      } catch (e: any) {
+        console.error(e);
         $toast.error("Não foi possível carregar os usuários.");
       } finally {
         this.loader.endLoading();
@@ -275,9 +294,10 @@ export default defineComponent({
         if (this.haveGuardian && this.selectedGuardian) {
           body.email = this.selectedGuardian.email;
           body.telefone = this.selectedGuardian.telefone;
-          body.id_responsavel = this.selectedGuardian.id_responsavel
-            ?? this.selectedGuardian.id_usuario
-            ?? this.selectedGuardian.id;
+          body.id_responsavel =
+            this.selectedGuardian.id_responsavel ??
+            this.selectedGuardian.id_usuario ??
+            this.selectedGuardian.id;
         } else body.telefone = this.user.telefone.replace(/[^0-9]/g, "");
 
         const response: any = await $api("/admin/usuarios/registrar", {
@@ -296,8 +316,9 @@ export default defineComponent({
           this.user.telefone = "";
           this.haveGuardian = false;
           await this.loadUsers();
-        } else if(response.status == 401) $toast.error(response.data.message);
-      } catch (e) {
+        } else if (response.status == 401) $toast.error(response.data.message);
+      } catch (e: any) {
+        console.error(e);
         $toast.error("Erro ao fazer o cadastro.");
       } finally {
         this.loader.endLoading();
@@ -343,8 +364,9 @@ export default defineComponent({
           this.guardian.email = "";
           this.guardian.nome = "";
           this.guardian.telefone = "";
-        } else if(response.status == 401) $toast.error(response.data.message);
-      } catch (e) {
+        } else if (response.status == 401) $toast.error(response.data.message);
+      } catch (e: any) {
+        console.error(e);
         $toast.error("Erro ao criar responsável.");
       } finally {
         this.savingGuardian = false;

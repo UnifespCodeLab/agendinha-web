@@ -13,7 +13,9 @@
     >
       <v-card-item v-if="user.telefone">
         <v-icon class="mr-2">mdi-phone-outline</v-icon>
-        <span class="text-label-medium">{{ formatPhoneNumber(user.telefone!) }}</span>
+        <span class="text-label-medium">{{
+          formatPhoneNumber(user.telefone!)
+        }}</span>
       </v-card-item>
       <template #title>
         <span class="font-weight-bold text-wrap">
@@ -21,9 +23,11 @@
         </span>
       </template>
       <template #prepend>
-        <img v-if="user.foto_perfil" 
-        class="rounded-square"
-        :src="formatProfilePhotoURL(user.foto_perfil!)"/>
+        <img
+          v-if="user.foto_perfil"
+          class="rounded-square"
+          :src="formatProfilePhotoURL(user.foto_perfil!)"
+        />
         <v-icon v-else size="60">mdi-account-outline</v-icon>
       </template>
     </v-card>
@@ -31,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { type User } from "~~/shared/types/user";
+import type { User } from "~~/shared/types/user";
 import formatPhoneNumber from "~/utils/formatPhoneNumber";
 
 const config = useRuntimeConfig();
@@ -39,7 +43,7 @@ defineProps({
   users: {
     type: Array as PropType<User[]>,
     required: true,
-  }
+  },
 });
 
 function formatProfilePhotoURL(value: string): string {

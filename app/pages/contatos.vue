@@ -2,8 +2,9 @@
   <v-container class="pa-0 h-100 position-fixed">
     <v-app-bar>
       <template #prepend>
-        <v-app-bar-title
-          class="font-weight-bold ml-2">Contatos da APARTE</v-app-bar-title>
+        <v-app-bar-title class="font-weight-bold ml-2"
+          >Contatos da APARTE</v-app-bar-title
+        >
       </template>
     </v-app-bar>
     <v-main class="d-flex flex-column ga-2">
@@ -38,7 +39,7 @@
             class="w-30 text-body-1 px-4 font-weight-bold"
             color="#BCD4FF"
             variant="flat"
-            style="color: #0C3784"
+            style="color: #0c3784"
             prepend-icon="mdi-open-in-new"
             @click="contact.callbackAction"
             >{{ contact.action }}</v-btn
@@ -50,20 +51,20 @@
 </template>
 
 <script setup lang="ts">
-import changePage from '~/utils/changePage';
-import openMap from '~/utils/openMap';
-import copyToClipboard from '~/utils/copyToClipboard';
+import changePage from "~/utils/changePage";
+import openMap from "~/utils/openMap";
+import copyToClipboard from "~/utils/copyToClipboard";
 
-definePageMeta({ 
+definePageMeta({
   showHeader: true,
-  requiresRole: "ROLE_USER"
+  requiresRole: "ROLE_USER",
 });
 
 function copy(data: string) {
   try {
     copyToClipboard(data);
-    $toast.success("Copiado com sucesso!");        
-  } catch(error) {
+    $toast.success("Copiado com sucesso!");
+  } catch (error) {
     $toast.error("Houve um erro ao copiar.");
     console.error(error);
   }
@@ -76,16 +77,16 @@ const contacts = [
     title: "Telefone",
     info: ["(12) 98245-4711"],
     action: "Ligar",
-    callbackAction: () => changePage('tel:+1298245-4711'),
-    callbackClipboard: () => copy("(12) 98245-4711")
+    callbackAction: () => changePage("tel:+1298245-4711"),
+    callbackClipboard: () => copy("(12) 98245-4711"),
   },
   {
     icon: "email",
     title: "E-mail",
     info: ["aparte@gmail.com.br"],
     action: "Enviar e-mail",
-    callbackAction: () => changePage('mailto:aparte@gmail.com.br'),
-    callbackClipboard: () => copy("aparte@gmail.com.br")
+    callbackAction: () => changePage("mailto:aparte@gmail.com.br"),
+    callbackClipboard: () => copy("aparte@gmail.com.br"),
   },
   {
     icon: "map-marker",
@@ -94,11 +95,13 @@ const contacts = [
       "Av. Santa Cruz do Areão, 2495",
       "Res. Santa Izabel, Taubaté - SP",
       "CEP: 12061-100",
-      
     ],
     action: "Abrir no mapa",
     callbackAction: () => openMap(-22.9924362, -45.5746279),
-    callbackClipboard: () => copy("Av. Santa Cruz do Areão, 2495, Res. Santa Izabel, Taubaté - SP, CEP: 12061-100")
+    callbackClipboard: () =>
+      copy(
+        "Av. Santa Cruz do Areão, 2495, Res. Santa Izabel, Taubaté - SP, CEP: 12061-100",
+      ),
   },
 ];
 </script>

@@ -29,9 +29,9 @@ const props = defineProps({
   color: {
     type: String,
     required: true,
-  }
+  },
 });
-defineEmits(['requestDetails']);
+defineEmits(["requestDetails"]);
 
 const allNotifications = ref([] as Notification[]);
 allNotifications.value = props.notifications;
@@ -39,18 +39,17 @@ allNotifications.value = props.notifications;
 watch(
   () => props.notifications,
   (value, oldValue) => {
-    if(value.length != oldValue.length)
-      allNotifications.value = value;
-  }
+    if (value.length != oldValue.length) allNotifications.value = value;
+  },
 );
 
-const realColor = ref('');
+const realColor = ref("");
 realColor.value = props.color;
 
 function formatDate(isoString: string): string {
   const date = new Date(isoString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   return `${day}/${month}`;
 }
 </script>

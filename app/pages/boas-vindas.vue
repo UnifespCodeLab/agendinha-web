@@ -1,9 +1,15 @@
 <template>
-  <v-container class="d-flex flex-column align-center justify-center text-center h-100">
+  <v-container
+    class="d-flex flex-column align-center justify-center text-center h-100"
+  >
     <v-app-bar elevation="0" color="transparent">
       <template #prepend>
         <v-app-bar-nav-icon>
-          <img src="/images/agendinha_logo.png" alt="Logo Agendinha" class="logo">
+          <img
+            src="/images/agendinha_logo.png"
+            alt="Logo Agendinha"
+            class="logo"
+          />
         </v-app-bar-nav-icon>
       </template>
     </v-app-bar>

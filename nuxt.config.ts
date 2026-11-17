@@ -2,7 +2,7 @@
 import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 export default defineNuxtConfig({
   app: {
-    pageTransition: { name: 'slide-right', mode: 'out-in' },
+    pageTransition: { name: "slide-right", mode: "out-in" },
   },
   compatibilityDate: "2024-04-03",
   devtools: { enabled: true },
@@ -16,8 +16,8 @@ export default defineNuxtConfig({
     "@nuxtjs/eslint-module",
     "@nuxt/icon",
     "@nuxt/fonts",
-    '@vite-pwa/nuxt',
-    '@pinia/nuxt',
+    "@vite-pwa/nuxt",
+    "@pinia/nuxt",
     (_options, nuxt) => {
       nuxt.hooks.hook("vite:extendConfig", (config: any) => {
         config.plugins.push(vuetify({ autoImport: true }));
@@ -25,12 +25,12 @@ export default defineNuxtConfig({
     },
   ],
   pwa: {
-    registerType: 'autoUpdate',
+    registerType: "autoUpdate",
     manifest: {
-      name: 'Agendinha',
-      short_name: 'Agendinha',
-      theme_color: '#000000'
-    }
+      name: "Agendinha",
+      short_name: "Agendinha",
+      theme_color: "#000000",
+    },
   },
   icon: {
     customCollections: [
@@ -53,8 +53,8 @@ export default defineNuxtConfig({
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8080/",
       googleClientId: process.env.NUXT_GOOGLE_CLIENT_ID,
       vapidPublicKey: process.env.NUXT_VAPID_PUBLIC_KEY,
-      vapidPrivateKey: process.env.NUXT_VAPID_PRIVATE_KEY
+      vapidPrivateKey: process.env.NUXT_VAPID_PRIVATE_KEY,
     },
   },
-  css: ['~/assets/css/main.css'],
+  css: ["~/assets/css/main.css"],
 });
