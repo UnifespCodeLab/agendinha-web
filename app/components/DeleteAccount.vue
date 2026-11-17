@@ -69,7 +69,6 @@ async function requestDelete(): Promise<void> {
     headers: {
       Authorization: `Bearer ${token.value}`,
     },
-    body: { id_usuario: props.userId },
   });
 
   if (response.status != 200) {
