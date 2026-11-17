@@ -28,7 +28,7 @@
           </p>
           <UserCardGenerator v-else :users="users" />
         </v-tabs-window-item>
-        <v-tabs-window-item value="create-user" class="h-full">
+        <v-tabs-window-item value="create-user" class="px-3 h-full mt-6">
           <v-switch
             v-model="haveGuardian"
             label="Associar a algum responsável"
@@ -68,6 +68,7 @@
             </template>
           </v-autocomplete>
           <v-mask-input
+            v-if="!haveGuardian"
             v-model="user.telefone"
             prepend-inner-icon="mdi-phone-outline"
             class="mt-4"
@@ -75,6 +76,7 @@
             mask="(##) #####-####"
           />
           <v-text-field
+            v-if="!haveGuardian"
             v-model="user.email"
             prepend-inner-icon="mdi-email-outline"
             label="E-mail"
@@ -92,9 +94,9 @@
             :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append-inner="show = !show"
           />
-          <v-btn class="w-100" :loading="loader.isLoading" @click="register()">Criar conta</v-btn>
+          <v-btn class="w-100" :loading="loader.isLoading" @click="registerUser()">Criar conta</v-btn>
         </v-tabs-window-item>
-        <v-tabs-window-item value="create-guardian">
+        <v-tabs-window-item value="create-guardian" class="px-3 h-full">
           <v-mask-input
             v-model="guardian.telefone"
             prepend-inner-icon="mdi-phone-outline"
@@ -201,7 +203,10 @@ export default defineComponent({
       }, 500);
     },
     haveGuardian(val: boolean) {
-      if (!val) this.clearGuardianSelection();
+      if (val) {
+        this.user.email = "";
+        this.user.telefone = "";
+      } else this.clearGuardianSelection();
     },
   },
   async mounted() {
@@ -236,17 +241,19 @@ export default defineComponent({
       }
     },
 
-    async register() {
+    async registerUser() {
       const { $toast, $api } = useNuxtApp();
 
-      if (!EMAIL_REGEX.test(this.user.email)) {
-        $toast.error("E-mail inválido.");
-        return;
-      }
+      if (!this.haveGuardian) {
+        if (!EMAIL_REGEX.test(this.user.email)) {
+          $toast.error("E-mail inválido.");
+          return;
+        }
 
-      if (!PHONE_BR_REGEX.test(this.user.telefone)) {
-        $toast.error("Telefone inválido.");
-        return;
+        if (!PHONE_BR_REGEX.test(this.user.telefone)) {
+          $toast.error("Telefone inválido.");
+          return;
+        }
       }
 
       if (this.user.senha.length <= 0) {
@@ -263,16 +270,15 @@ export default defineComponent({
       try {
         const token = useCookie("token");
 
-        const body: Record<string, any> = {
-          ...this.user,
-          telefone: this.user.telefone.replace(/[^0-9]/g, ""),
-        };
+        const body: Record<string, any> = { ...this.user };
 
         if (this.haveGuardian && this.selectedGuardian) {
+          body.email = this.selectedGuardian.email;
+          body.telefone = this.selectedGuardian.telefone;
           body.id_responsavel = this.selectedGuardian.id_responsavel
             ?? this.selectedGuardian.id_usuario
             ?? this.selectedGuardian.id;
-        }
+        } else body.telefone = this.user.telefone.replace(/[^0-9]/g, "");
 
         const response: any = await $api("/admin/usuarios/registrar", {
           method: "POST",
@@ -288,11 +294,9 @@ export default defineComponent({
           this.user.nome = "";
           this.user.senha = "";
           this.user.telefone = "";
-          this.haveGuardian = false; // também limpa a seleção via watcher
+          this.haveGuardian = false;
           await this.loadUsers();
-        } else {
-          $toast.error("Erro ao fazer o cadastro.");
-        }
+        } else if(response.status == 401) $toast.error(response.data.message);
       } catch (e) {
         $toast.error("Erro ao fazer o cadastro.");
       } finally {
@@ -319,10 +323,10 @@ export default defineComponent({
       }
 
       this.savingGuardian = true;
+      this.loader.startLoading();
       try {
         const token = useCookie("token");
 
-        // ⚠️ Ajuste o endpoint conforme sua API
         const response: any = await $api("/responsaveis/create", {
           method: "POST",
           body: {
@@ -339,13 +343,12 @@ export default defineComponent({
           this.guardian.email = "";
           this.guardian.nome = "";
           this.guardian.telefone = "";
-        } else {
-          $toast.error("Erro ao criar responsável.");
-        }
+        } else if(response.status == 401) $toast.error(response.data.message);
       } catch (e) {
         $toast.error("Erro ao criar responsável.");
       } finally {
         this.savingGuardian = false;
+        this.loader.endLoading();
       }
     },
   },
