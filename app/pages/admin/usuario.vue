@@ -30,7 +30,11 @@
           >
             Nenhum usuário encontrado.
           </p>
-          <UserCardGenerator v-else :users="users" />
+          <UserCardGenerator 
+            v-else 
+            :users="users" 
+            @request-details="openSelectedUser"
+          />
         </v-tabs-window-item>
         <v-tabs-window-item value="create-user" class="px-3 h-full mt-6">
           <v-switch
@@ -142,6 +146,14 @@
         </v-tabs-window-item>
       </v-tabs-window>
     </v-main>
+    <div v-if="showDetails">
+      <UserEditCard 
+        v-bind="selectedUser"
+        @close="showDetails = false"
+        @saved="loadUsers"
+        @deleted="loadUsers"
+      />
+    </div>
   </v-container>
 </template>
 
@@ -151,6 +163,7 @@ import type UserRegister from "~~/shared/types/userRegister";
 import type { User } from "~~/shared/types/user";
 import { useAuthStore } from "~/stores/auth";
 import type GuardianRegister from "~~/shared/types/guardianRegister";
+import type ShowUser from "~~/shared/types/showUser";
 
 const EMAIL_REGEX = /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 const PHONE_BR_REGEX =
@@ -188,6 +201,8 @@ export default defineComponent({
       loader: useLoaderStore(),
       auth: useAuthStore(),
       tab: "list" as string | null,
+      showDetails: ref(false),
+      selectedUser: ref({ show: false } as ShowUser),
     };
   },
   watch: {
@@ -234,6 +249,19 @@ export default defineComponent({
     if (this.guardianSearchTimeout) clearTimeout(this.guardianSearchTimeout);
   },
   methods: {
+    openSelectedUser(user: User) {
+      this.selectedUser = {
+        id_usuario: user.id_usuario,
+        telefone: user.telefone ? user.telefone : user.responsavel?.telefone,
+        nome: user.nome,
+        email: user.email,
+        cadastro_confirmado: user.cadastro_confirmado,
+        nome_responsavel: user.responsavel?.nome,
+        show: true,
+      } as ShowUser;
+      this.showDetails = true;
+    },
+
     clearGuardianSelection() {
       this.selectedGuardian = null;
       this.guardianSearch = "";
@@ -251,7 +279,9 @@ export default defineComponent({
           },
           query: { page_size: 100 },
         });
-        this.users = response.data.results;
+        this.users = response.data.results.filter(
+          (user: User) => user.role === "ROLE_USER"
+        );
       } catch (e: any) {
         console.error(e);
         $toast.error("Não foi possível carregar os usuários.");
