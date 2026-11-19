@@ -270,6 +270,7 @@ definePageMeta({ showHeader: true, requiresRole: "ROLE_ADMIN" });
 const { $api, $toast } = useNuxtApp();
 const toast = $toast as any;
 const tokenCookie = useCookie<string | null>("token");
+const loader = useLoaderStore();
 
 // States
 const formRef = ref<any>(null);
@@ -395,6 +396,7 @@ const confirmDeleteAppointment = async () => {
   if (!appointmentToDelete.value) return;
   const id = appointmentToDelete.value;
 
+  loader.startLoading();
   try {
     const res: any = await $api(`/agendamentos/${id}/delete`, {
       method: "DELETE",
@@ -412,6 +414,7 @@ const confirmDeleteAppointment = async () => {
   } finally {
     showDeleteDialog.value = false;
     appointmentToDelete.value = null;
+    loader.endLoading();
   }
 };
 
@@ -446,10 +449,7 @@ const handleEditAppointment = (id: number) => {
 const salvarAgendamento = async () => {
   if (!formRef.value) return;
   const { valid } = await formRef.value.validate();
-
-  if (!valid) {
-    return;
-  }
+  if (!valid) return;
 
   salvando.value = true;
   try {
@@ -461,6 +461,7 @@ const salvarAgendamento = async () => {
       medico: form.value.medico.toUpperCase(),
       id_usuario: Number(form.value.paciente.id_usuario),
     };
+    loader.startLoading();
 
     let res: any;
     if (editingAppointmentId.value) {
@@ -503,6 +504,7 @@ const salvarAgendamento = async () => {
     toast.error("Erro ao salvar agendamento.");
   } finally {
     salvando.value = false;
+    loader.endLoading();
   }
 };
 

@@ -65,7 +65,7 @@ const { user } = storeToRefs(auth);
 const profileImageURL: Ref<string | string> = ref("");
 
 profileImageURL.value = user.value.foto_perfil
-  ? `${config.public.apiBase}${user.value.foto_perfil}`
+  ? `${config.public.apiBase}/${user.value.foto_perfil}`
   : "no-image";
 
 function logUserOut(): void {
