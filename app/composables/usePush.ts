@@ -12,8 +12,7 @@ export const usePush = async (id_usuario: number) => {
 
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: 
-      urlBase64ToUint8Array(config.public.vapidPublicKey)
+    applicationServerKey: urlBase64ToUint8Array(config.public.vapidPublicKey),
   });
 
   const { $api } = useNuxtApp();
@@ -27,8 +26,8 @@ export const usePush = async (id_usuario: number) => {
       auth: arrayBufferToBase64Legacy(subscription.getKey("auth")!),
     },
     encoding: PushManager.supportedContentEncodings,
-  }
-  
+  };
+
   const response = await $api("/salvar-inscricao", {
     method: "POST",
     headers: {
@@ -38,4 +37,4 @@ export const usePush = async (id_usuario: number) => {
   });
 
   return response;
-}
+};

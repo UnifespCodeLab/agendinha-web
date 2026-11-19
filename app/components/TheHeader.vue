@@ -1,6 +1,12 @@
 <template>
-  <v-container class="fix-header pa-0 position-fixed bottom-0 bg-white d-flex justify-center">
-    <v-tabs v-if="auth.user.role == 'ROLE_ADMIN'" v-model="currentTab" @click="changePage">
+  <v-container
+    class="fix-header pa-0 position-fixed bottom-0 bg-white d-flex justify-center"
+  >
+    <v-tabs
+      v-if="auth.user.role == 'ROLE_ADMIN'"
+      v-model="currentTab"
+      @click="changePage"
+    >
       <v-tab value="/admin">
         <div class="custom-tab">
           <v-icon size="24" icon="mdi-home-outline" />
@@ -42,14 +48,14 @@
       <v-tab value="/notificacoes" @click="totalNotifications = 0">
         <div class="custom-tab">
           <v-icon
-            :icon="totalNotifications > 0 ? 'mdi-bell-ring-outline' : 'mdi-bell-outline'"
+            :icon="
+              totalNotifications > 0
+                ? 'mdi-bell-ring-outline'
+                : 'mdi-bell-outline'
+            "
             size="24"
           />
-          <span 
-            v-if="totalNotifications > 9"
-            class="number-indicator"
-            >+9</span
-          >
+          <span v-if="totalNotifications > 9" class="number-indicator">+9</span>
           <span
             v-if="totalNotifications > 0 && totalNotifications < 9"
             class="number-indicator"
@@ -70,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth';
+import { useAuthStore } from "~/stores/auth";
 
 const auth = useAuthStore();
 const totalNotifications = ref(0);
@@ -78,16 +84,16 @@ totalNotifications.value = auth.notReadNotifications;
 
 watch(
   () => auth.notReadNotifications,
-  (value, _) => totalNotifications.value = value
+  (value, _) => (totalNotifications.value = value),
 );
-const currentTab = ref('/');
+const currentTab = ref("/");
 const route = useRoute();
 const router = useRouter();
 
 currentTab.value = route.path;
 
 function changePage() {
-  router.push(currentTab.value ?? '/');
+  router.push(currentTab.value ?? "/");
 }
 </script>
 

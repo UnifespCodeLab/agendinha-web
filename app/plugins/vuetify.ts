@@ -1,7 +1,7 @@
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import { createVuetify, type ThemeDefinition } from "vuetify";
-import { VMaskInput } from 'vuetify/labs/VMaskInput';
+import { VMaskInput } from "vuetify/labs/VMaskInput";
 
 const customLight: ThemeDefinition = {
   dark: false,
@@ -42,7 +42,7 @@ export default defineNuxtPlugin((app) => {
       },
       VSwitch: {
         baseColor: "#545454",
-        color: "#0C3784"
+        color: "#0C3784",
       },
       VBtn: {
         color: "#1C3B72",
@@ -53,8 +53,8 @@ export default defineNuxtPlugin((app) => {
         variant: "flat",
       },
       VAppBar: {
-        style: [{ boxShadow: "1px 1px #e8e9ed" }]
-      }
+        style: [{ boxShadow: "1px 1px #e8e9ed" }],
+      },
     },
   });
   app.vueApp.use(vuetify);

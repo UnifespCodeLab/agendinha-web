@@ -1,4 +1,4 @@
-export const useLoaderStore = defineStore('loader', {
+export const useLoaderStore = defineStore("loader", {
   state: () => ({
     isLoading: false,
   }),
