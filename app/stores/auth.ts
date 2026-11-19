@@ -14,7 +14,6 @@ export const useAuthStore = defineStore("auth", {
     notifications: [] as Notification[],
     notReadNotifications: 0,
     page: "/",
-    accessToken: "" as string,
   }),
   actions: {
     async refreshAuth() {
@@ -110,7 +109,6 @@ export const useAuthStore = defineStore("auth", {
 
                 this.user = data.usuario;
                 this.notifications = data.notificacoes;
-                this.accessToken = data.google_access_token ?? null;
 
                 endRequest(responseCode, { data });
               } catch (err: any) {
@@ -133,12 +131,31 @@ export const useAuthStore = defineStore("auth", {
           .requestCode();
       });
     },
+    requestGoogleCalendarCode(): Promise<string> {
+      const config = useRuntimeConfig();
+      return new Promise((resolve, reject) => {
+        googleSdkLoaded((google) => {
+          google.accounts.oauth2
+            .initCodeClient({
+              client_id: config.public.googleClientId,
+              scope: "https://www.googleapis.com/auth/calendar.events",
+              ux_mode: "popup",
+              select_account: true,
+              callback: (response: any) => {
+                if (response.error || !response.code) reject(new Error("GOOGLE_AUTH_CANCELLED"));
+                else resolve(response.code);
+              },
+              error_callback: () => reject(new Error("GOOGLE_POPUP_FAILED")),
+            })
+            .requestCode();
+        });
+      });
+    },
     logout() {
       const token = useCookie("token");
       this.authenticated = false;
       this.user = {} as User;
       token.value = null;
-      this.accessToken = "";
     },
   },
 });

@@ -53,7 +53,7 @@
         </v-card-text>
       </section>
       <v-divider :thickness="3" />
-      <v-card-actions v-if="props.modo_google" class="pa-4 mt-4 pt-0 mb-2">
+      <v-card-actions class="pa-4 mt-4 pt-0 mb-2">
         <v-btn
           color="primary"
           variant="flat"
@@ -74,21 +74,20 @@ import { useAuthStore } from "~/stores/auth";
 import { useLoaderStore } from "~/stores/loader";
 import convertToISODate from "~/utils/convertToISODate";
 
-const { $toast } = useNuxtApp();
+const { $api, $toast } = useNuxtApp();
 const props = defineProps<ShowAppointment>();
-const auth = useAuthStore();
-const { accessToken } = storeToRefs(auth);
 const loader = useLoaderStore();
 const emit = defineEmits(["close", "edit", "delete"]);
 
 const status = ref(false);
 status.value = props.show;
+const auth = useAuthStore();
+const token = useCookie("token");
 
 async function moveToGoogleCalendar() {
-  loader.startLoading();
-  emit("close");
   const start = convertToISODate(props.data);
   const end = new Date(start.getTime() + 60 * 60 * 1000);
+  loader.startLoading();
 
   const event = {
     summary: props.titulo,
@@ -99,30 +98,39 @@ async function moveToGoogleCalendar() {
     colorId: "6",
   };
 
-  const response: any = await $fetch.raw(
-    "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-    {
+  const useStoredAuth = !!(props.modo_google && auth.user.google_conectado);
+  let code: string | undefined;
+  if (!useStoredAuth) {
+    try {
+      code = await auth.requestGoogleCalendarCode();
+    } catch {
+      $toast.error("Autorização do Google cancelada.");
+      loader.endLoading();
+      emit("close");
+      return;
+    }
+  }
+
+  emit("close");
+  try {
+    const res: any = await $api("/agendamentos/google", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken.value}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(event),
-    },
-  );
+      body: code ? { ...event, code } : event,
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    if (res?.status >= 400) throw { status: res.status, data: res.data };
 
-  if (response.status === 401) {
-    $toast.error("Erro ao exportar agendamento.");
+    $toast.success("Agendamento criado.");
+  } catch (e: any) {
+    const statusCode = e?.status ?? e?.statusCode;
+    if (statusCode === 401) {
+      if (useStoredAuth) {
+        auth.user.google_conectado = false; // o próximo clique já abre o popup
+        $toast.error("Autorização do Google expirada. Toque em exportar de novo para autorizar.");
+      } else $toast.error(e?.data?.message ?? "Sem permissão no Google Agenda.");
+    } else $toast.error("Erro ao exportar agendamento.");
+  } finally {
     loader.endLoading();
-    throw new Error("TOKEN_EXPIRED");
   }
-  if (!response.ok) {
-    $toast.error("Erro ao exportar agendamento.");
-    loader.endLoading();
-    throw new Error(`Calendar API error: ${response.status}`);
-  }
-
-  $toast.success("Agendamento criado.");
-  loader.endLoading();
 }
 </script>
