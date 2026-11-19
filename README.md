@@ -30,36 +30,6 @@
 
 [Link para o Figma](https://www.figma.com/design/YcsePD84W6dDpqlqEI1Uij/Prot%C3%B3tipos?node-id=0-1&p=f&t=aCiNfIbbh89TsGnt-0)
 
-## **Imagens do Protótipo**
-
-### **Página de Cadastro**
-
-<img width="357" height="784" alt="Image" src="https://github.com/user-attachments/assets/ad90c487-fdce-45e9-a776-544ad84a4464" />
-
-### **Página de Login**
-
-<img width="362" height="786" alt="Image" src="https://github.com/user-attachments/assets/d6a67c53-a13a-4012-8795-f8a1e0204f85" />
-
-### **Página de 'Esqueceu a Senha'**
-
-<img width="360" height="785" alt="Image" src="https://github.com/user-attachments/assets/b943e572-4f67-445a-8c0d-9f9c66ced7c4" />
-
-### **Página de Notificações**
-
-<img width="358" height="783" alt="Image" src="https://github.com/user-attachments/assets/68abe18d-d5dd-4921-8ec7-6a8fbc39281c" />
-
-### **Página de Contatos**
-
-<img width="356" height="783" alt="Image" src="https://github.com/user-attachments/assets/3e745ffa-1bdd-4ea6-a86e-89ac12d8e6e2" />
-
-### **Página de Exames**
-
-<img width="358" height="783" alt="Image" src="https://github.com/user-attachments/assets/274c76ce-5070-4756-a132-97286e3fba03" />
-
-## **Diagrama Entidade-Relacionamento**
-
-![Diagrama_Entidade_Relacionamento](https://github.com/user-attachments/assets/e21dc688-dcad-487d-bfc5-b878cf8d49e3)
-
 ## **Status**
 
 - [ ] Em ideação
