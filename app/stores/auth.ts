@@ -6,6 +6,7 @@ import type { User } from "~~/shared/types/user";
 import { useLoaderStore } from "~/stores/loader";
 
 type Callback = (status: number, data: any) => void;
+let notificationsInFlight = false;
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -130,6 +131,28 @@ export const useAuthStore = defineStore("auth", {
           })
           .requestCode();
       });
+    },
+    async refreshNotifications() {
+      if (!this.user?.id_usuario || notificationsInFlight) return;
+      notificationsInFlight = true;
+      try {
+        const { $api } = useNuxtApp();
+        const token = useCookie("token");
+        const response: any = await $api(
+          `/notificacoes/usuario/${this.user.id_usuario}`,
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token.value}` },
+          },
+        );
+        const loaded: Notification[] = response.data ?? [];
+        this.notifications = loaded;
+        this.notReadNotifications = loaded.filter((n) => !n.lida).length;
+      } catch (e) {
+        console.warn("Falha ao atualizar notificações", e);
+      } finally {
+        notificationsInFlight = false;
+      }
     },
     requestGoogleCalendarCode(): Promise<string> {
       const config = useRuntimeConfig();

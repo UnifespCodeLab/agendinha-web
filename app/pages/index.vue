@@ -169,49 +169,87 @@ export default defineComponent({
       showAppointmentDetails: ref(false),
       selectedAppointment: ref({} as Appointment),
       auth: useAuthStore(),
+      pollTimer: null as ReturnType<typeof setInterval> | null,
+      fetching: false,
+      initialized: false,
     };
   },
+  watch: {
+    "auth.notifications"(novas: any[], antigas: any[]) {
+      if ((novas?.length ?? 0) > (antigas?.length ?? 0)) this.loadAppointments(true);
+    },
+  },
   async mounted() {
-    this.loader.startLoading();
-    const { $api } = useNuxtApp();
-    const token = useCookie("token");
-
-    try {
-      const response = await $api("/agendamentos/usuario", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      });
-
-      this.allAppointments = response.data ?? [];
-      if (this.allAppointments.length <= 0) {
-        this.noAppointments = true;
-        return;
-      }
-
-      this.allAppointments.forEach((Appointment) =>
-        this.attributes.push({
-          key: Appointment.titulo,
-          bar: {
-            style: {
-              backgroundColor: "#E32585",
-            },
-          },
-          dates: convertToISODate(Appointment.data),
-        }),
-      );
-
-      this.updateAppointmentsList();
-      this.updateText();
-    } catch (e) {
-      console.error(e);
-      this.noAppointments = true;
-    } finally {
-      this.loader.endLoading();
-    }
+    await this.loadAppointments();
+    this.pollTimer = setInterval(() => {
+      if (!document.hidden) this.loadAppointments(true);
+    }, 10_000);
+    document.addEventListener("visibilitychange", this.onVisibilityChange);
+  },
+  beforeUnmount() {
+    if (this.pollTimer) clearInterval(this.pollTimer);
+    document.removeEventListener("visibilitychange", this.onVisibilityChange);
   },
   methods: {
+    onVisibilityChange() {
+      if (!document.hidden) this.loadAppointments(true);
+    },
+
+    async loadAppointments(silent = false) {
+      if (this.fetching) return; // evita buscas sobrepostas
+      this.fetching = true;
+      const { $api, $toast } = useNuxtApp();
+      const token = useCookie("token");
+      if (!silent) this.loader.startLoading();
+
+      try {
+        const response: any = await $api("/agendamentos/usuario", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
+        const loaded: Appointment[] = response.data ?? [];
+
+        // O que chegou desde a última busca
+        const knownIds = new Set(this.allAppointments.map((a) => a.id_agendamento));
+        const arrived = this.initialized
+          ? loaded.filter((a) => !knownIds.has(a.id_agendamento))
+          : [];
+
+        this.allAppointments = loaded;
+        this.noAppointments = loaded.length <= 0; // volta a false quando chega o primeiro
+        this.attributes = [
+          {
+            key: "today",
+            highlight: { color: "blue", fillMode: "light" },
+            dates: new Date(),
+          },
+          ...loaded.map((a) => ({
+            key: String(a.id_agendamento),
+            bar: { style: { backgroundColor: "#E32585" } },
+            dates: convertToISODate(a.data),
+          })),
+        ];
+
+        // Reaplica semana/futuros/dia e o texto da busca que o usuário já digitou
+        this.filterAppointmentListByTitle();
+        this.initialized = true;
+
+        if (arrived.length === 1) {
+          $toast.success(`Novo compromisso: ${arrived[0]!.titulo}`);
+        } else if (arrived.length > 1) {
+          $toast.success(`${arrived.length} novos compromissos`);
+        }
+      } catch (e) {
+        if (silent) console.warn("Falha ao atualizar agendamentos", e);
+        else {
+          console.error(e);
+          this.noAppointments = true;
+        }
+      } finally {
+        this.fetching = false;
+        if (!silent) this.loader.endLoading();
+      }
+    },
     updateAppointmentsList() {
       this.weekAppointments = this.allAppointments.filter(
         (appointment) =>
