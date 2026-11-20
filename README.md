@@ -50,7 +50,9 @@ Funcionários da instituição, médicos, enfermeiros e pais/responsáveis.
 
 **4.** Execute `npm install` ou `npm i`. Você também pode usar o Makefile com `make` (se fez dessa maneira, pode pular o passo 5);
 
-**5.** Execute `npm run dev`. A aplicação ficará disponível em `http://localhost:3000`.
+**5.** Execute `npm run dev`. A aplicação ficará disponível em `http://localhost:3000`;
+
+**6.** *(Opcional)* Para executar o back-end, acesse o [repositório do back-end](https://github.com/UnifespCodeLab/agendinha-backend-simple) e siga as instruções de lá.
 
 ## **Variáveis de Ambiente**
 
