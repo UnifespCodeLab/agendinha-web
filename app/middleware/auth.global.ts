@@ -23,12 +23,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (token.value && requiredRole) {
-    const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    const allowedRoles = Array.isArray(requiredRole)
+      ? requiredRole
+      : [requiredRole];
 
     if (!allowedRoles.includes(user.value.role)) {
       const target = user.value.role == "ROLE_ADMIN" ? "/admin" : "/";
       return navigateTo(target);
     }
   }
-
 });

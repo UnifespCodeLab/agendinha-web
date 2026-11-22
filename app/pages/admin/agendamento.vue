@@ -2,20 +2,28 @@
   <v-container fluid class="h-100 position-fixed">
     <v-app-bar>
       <template #prepend>
-        <v-app-bar-title
-          class="font-weight-bold ml-2">Gerenciar agendamentos</v-app-bar-title>
+        <v-app-bar-title class="font-weight-bold ml-2"
+          >Gerenciar agendamentos</v-app-bar-title
+        >
       </template>
     </v-app-bar>
     <div class="mt-16 pt-2 w-100 mx-auto px-4">
       <v-tabs v-model="tab" grow color="primary">
-        <v-tab value="novo">Novo Agendamento</v-tab>
-        <v-tab value="calendario">Calendário</v-tab>
+        <v-tab value="novo" color="black">
+          <p class="font-weight-bold">Novo Agendamento</p>
+        </v-tab>
+        <v-tab value="calendario" color="black">
+          <p class="font-weight-bold">Calendário</p>
+        </v-tab>
       </v-tabs>
-
-      <v-tabs-window v-model="tab" class="mt-4">
+      <v-tabs-window v-model="tab" class="mt-4 h-full">
         <!-- NOVO AGENDAMENTO -->
         <v-tabs-window-item value="novo">
-          <v-form ref="formRef" class="pt-2 pb-4" @submit.prevent="salvarAgendamento">
+          <v-form
+            ref="formRef"
+            class="pt-2 pb-4"
+            @submit.prevent="salvarAgendamento"
+          >
             <v-row dense>
               <v-col cols="12" md="6">
                 <v-autocomplete
@@ -30,14 +38,25 @@
                   placeholder="Buscar por nome..."
                   variant="outlined"
                   rounded="lg"
-                  :hide-no-data="!pesquisaPaciente || pesquisaPaciente.length < 2"
+                  :hide-no-data="
+                    !pesquisaPaciente || pesquisaPaciente.length < 2
+                  "
                   clearable
-                  :rules="[v => !!v || 'O paciente é obrigatório']"
+                  :rules="[(v) => !!v || 'O paciente é obrigatório']"
                 >
                   <template #no-data>
                     <v-list-item>
-                      <v-list-item-title v-if="buscandoPacientes" class="d-flex align-center">
-                        <v-progress-circular indeterminate size="20" width="2" color="primary" class="mr-2" />
+                      <v-list-item-title
+                        v-if="buscandoPacientes"
+                        class="d-flex align-center"
+                      >
+                        <v-progress-circular
+                          indeterminate
+                          size="20"
+                          width="2"
+                          color="primary"
+                          class="mr-2"
+                        />
                         Buscando pacientes...
                       </v-list-item-title>
                       <v-list-item-title v-else>
@@ -50,43 +69,38 @@
                   </template>
                 </v-autocomplete>
               </v-col>
-              
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="form.titulo"
                   prepend-inner-icon="mdi-text-short"
                   label="Título"
-                  :rules="[v => !!v || 'O título é obrigatório']"
+                  :rules="[(v) => !!v || 'O título é obrigatório']"
                 />
               </v-col>
-
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="form.data"
                   prepend-inner-icon="mdi-calendar-clock-outline"
                   label="Data e hora"
                   type="datetime-local"
-                  :rules="[v => !!v || 'A data e hora são obrigatórias']"
+                  :rules="[(v) => !!v || 'A data e hora são obrigatórias']"
                 />
               </v-col>
-
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="form.local"
                   prepend-inner-icon="mdi-map-marker-outline"
                   label="Local"
-                  :rules="[v => !!v || 'O local é obrigatório']"
+                  :rules="[(v) => !!v || 'O local é obrigatório']"
                 />
               </v-col>
-              
               <v-col cols="12">
                 <v-text-field
                   v-model="form.medico"
                   prepend-inner-icon="mdi-stethoscope"
-                  label="Médico responsável"
+                  label="Responsável pelo atendimento"
                 />
               </v-col>
-
               <v-col cols="12">
                 <v-textarea
                   v-model="form.descricao"
@@ -100,24 +114,24 @@
                 />
               </v-col>
             </v-row>
-
             <v-btn
               class="w-100 mt-2"
               color="primary"
               :loading="salvando"
               type="submit"
             >
-              {{ editingAppointmentId ? 'Salvar edição' : 'Confirmar agendamento' }}
+              {{
+                editingAppointmentId ? "Salvar edição" : "Confirmar agendamento"
+              }}
             </v-btn>
           </v-form>
         </v-tabs-window-item>
-
         <!-- CALENDÁRIO -->
         <v-tabs-window-item value="calendario">
-          <div class="mx-auto" style="max-width: 1000px;">
+          <div class="mx-auto" style="max-width: 1000px">
             <section class="calendar pt-4">
               <ClientOnly>
-                <component 
+                <component
                   :is="'NewCalendar'"
                   locale="pt-BR"
                   expanded
@@ -126,17 +140,39 @@
                   :attributes="attributes"
                   @dayclick="onDayClick"
                 >
-                  <template #day-popover="{ attributes: dayAttributes, dayTitle }">
+                  <template
+                    #day-popover="{ attributes: dayAttributes, dayTitle }"
+                  >
                     <div class="px-2 py-1">
-                      <div class="font-weight-bold mb-1 text-center">{{ dayTitle }}</div>
-                      <template v-for="(popoverAttrs, i) in [dayAttributes.filter((a: any) => a.popover?.label)]" :key="i">
-                        <template v-for="attr in popoverAttrs.slice(0, 3)" :key="attr.key">
+                      <div class="font-weight-bold mb-1 text-center">
+                        {{ dayTitle }}
+                      </div>
+                      <template
+                        v-for="(popoverAttrs, i) in [
+                          dayAttributes.filter((a: any) => a.popover?.label),
+                        ]"
+                        :key="i"
+                      >
+                        <template
+                          v-for="attr in popoverAttrs.slice(0, 3)"
+                          :key="attr.key"
+                        >
                           <div class="d-flex align-center text-caption mb-1">
-                            <span class="rounded-circle mr-2" style="width: 8px; height: 8px; background-color: #E32585;" />
+                            <span
+                              class="rounded-circle mr-2"
+                              style="
+                                width: 8px;
+                                height: 8px;
+                                background-color: #e32585;
+                              "
+                            />
                             <span>{{ attr.popover.label }}</span>
                           </div>
                         </template>
-                        <div v-if="popoverAttrs.length > 3" class="text-caption font-italic mt-1">
+                        <div
+                          v-if="popoverAttrs.length > 3"
+                          class="text-caption font-italic mt-1"
+                        >
                           + {{ popoverAttrs.length - 3 }} agendamento(s)
                         </div>
                       </template>
@@ -145,11 +181,15 @@
                 </component>
               </ClientOnly>
             </section>
-            
             <div v-if="dayExams.length > 0" class="mt-4">
-              <p class="mb-4 font-weight-bold">Compromissos marcados nesse dia</p>
+              <p class="mb-4 font-weight-bold">
+                Compromissos marcados nesse dia
+              </p>
               <section class="scroll">
-                <AppointmentCardGenerator :appointments="dayExams" @request-details="(exam: Appointment) => requestDetails(exam)"/>
+                <AppointmentCardGenerator
+                  :appointments="dayExams"
+                  @request-details="(exam: Appointment) => requestDetails(exam)"
+                />
               </section>
             </div>
             <section v-else class="text-center mt-8">
@@ -159,7 +199,6 @@
         </v-tabs-window-item>
       </v-tabs-window>
     </div>
-
     <div v-if="showExamDetails && selectedExam">
       <AppointmentCard
         :id_agendamento="selectedExam.id_agendamento"
@@ -179,30 +218,32 @@
         @edit="handleEditAppointment"
       />
     </div>
-
     <!-- Delete Confirmation Dialog -->
     <v-dialog v-model="showDeleteDialog" max-width="400">
       <v-card class="rounded-xl pa-2">
-        <v-card-title class="text-h6 font-weight-bold d-flex align-center text-error">
+        <v-card-title
+          class="text-h6 font-weight-bold d-flex align-center text-error"
+        >
           <v-icon color="error" class="mr-2">mdi-alert-circle</v-icon>
           Apagar Agendamento
         </v-card-title>
         <v-card-text class="pt-2 text-body-1">
-          Tem certeza que deseja apagar este agendamento? Esta ação <strong>não</strong> pode ser desfeita.
+          Tem certeza que deseja apagar este agendamento? Esta ação
+          <strong>não</strong> pode ser desfeita.
         </v-card-text>
         <v-card-actions class="d-flex ga-2 mt-2 px-4 pb-4">
-          <v-btn 
-            variant="tonal" 
-            class="flex-grow-1 rounded-lg font-weight-bold" 
+          <v-btn
+            variant="tonal"
+            class="flex-grow-1 rounded-lg font-weight-bold"
             height="44"
             @click="showDeleteDialog = false"
           >
             Cancelar
           </v-btn>
-          <v-btn 
-            color="error" 
-            variant="flat" 
-            class="flex-grow-1 rounded-lg font-weight-bold" 
+          <v-btn
+            color="error"
+            variant="flat"
+            class="flex-grow-1 rounded-lg font-weight-bold"
             height="44"
             @click="confirmDeleteAppointment"
           >
@@ -215,18 +256,21 @@
 </template>
 
 <script setup lang="ts">
-import type Appointment from '~~/shared/types/appointment';
-import type CalendarAttributes from '~~/shared/types/calendarAttributes';
-import { parseDateFromAPI, compareDateOnly, formatDateToAPI, formatDatetimeLocal } from '~/utils/date';
-import { useAuthStore } from '~/stores/auth';
+import type Appointment from "~~/shared/types/appointment";
+import type CalendarAttributes from "~~/shared/types/calendarAttributes";
+import {
+  parseDateFromAPI,
+  compareDateOnly,
+  formatDateToAPI,
+  formatDatetimeLocal,
+} from "~/utils/date";
 
-definePageMeta({ showHeader: true, requiresRole: 'ROLE_ADMIN' });
+definePageMeta({ showHeader: true, requiresRole: "ROLE_ADMIN" });
 
 const { $api, $toast } = useNuxtApp();
 const toast = $toast as any;
-const auth = useAuthStore();
-const tokenCookie = useCookie<string | null>('token');
-const router = useRouter();
+const tokenCookie = useCookie<string | null>("token");
+const loader = useLoaderStore();
 
 // States
 const formRef = ref<any>(null);
@@ -235,29 +279,31 @@ const editingAppointmentId = ref<number | null>(null);
 const salvando = ref(false);
 const pacientesEncontrados = ref<any[]>([]);
 const buscandoPacientes = ref(false);
-const pesquisaPaciente = ref('');
+const pesquisaPaciente = ref("");
 let timeoutBusca: any = null;
 
 const form = ref({
   paciente: null as any,
-  titulo: '',
-  descricao: '',
-  data: '',
-  local: '',
-  medico: '',
+  titulo: "",
+  descricao: "",
+  data: "",
+  local: "",
+  medico: "",
 });
 
-const tab = ref('novo');
+const tab = ref("novo");
 const allExams = ref<(Appointment & { parsedDate?: Date })[]>([]);
 const dayExams = ref<Appointment[]>([]);
-const attributes = ref<CalendarAttributes[]>([{
-  key: 'today',
-  highlight: {
-    color: 'blue',
-    fillMode: 'light',
+const attributes = ref<CalendarAttributes[]>([
+  {
+    key: "today",
+    highlight: {
+      color: "blue",
+      fillMode: "light",
+    },
+    dates: new Date(),
   },
-  dates: new Date(),
-}]);
+]);
 const selectedDate = ref(new Date());
 const showExamDetails = ref(false);
 const selectedExam = ref<Appointment | null>(null);
@@ -269,9 +315,9 @@ const appointmentToDelete = ref<number | null>(null);
 const fetchExams = async () => {
   let data = [];
   try {
-    const res: any = await $api('/agendamentos', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${tokenCookie.value}` }
+    const res: any = await $api("/agendamentos", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${tokenCookie.value}` },
     });
     if (res.status === 200 && res.data) {
       data = res.data;
@@ -279,34 +325,36 @@ const fetchExams = async () => {
   } catch (e) {
     console.error(e);
   }
-  
+
   allExams.value = data.map((exam: Appointment) => ({
     ...exam,
-    parsedDate: parseDateFromAPI(exam.data)
+    parsedDate: parseDateFromAPI(exam.data),
   }));
-  
-  const newAttributes: CalendarAttributes[] = [{
-    key: 'today',
-    highlight: {
-      color: 'blue',
-      fillMode: 'light',
-    },
-    dates: new Date(),
-  }];
 
-  allExams.value.forEach((exam) => 
+  const newAttributes: CalendarAttributes[] = [
+    {
+      key: "today",
+      highlight: {
+        color: "blue",
+        fillMode: "light",
+      },
+      dates: new Date(),
+    },
+  ];
+
+  allExams.value.forEach((exam) =>
     newAttributes.push({
       key: String(exam.id_agendamento),
       bar: {
         style: {
-          backgroundColor: '#E32585'
-        }
+          backgroundColor: "#E32585",
+        },
       },
       popover: {
-        label: `${exam.nome_paciente || 'Paciente'} - ${exam.titulo}`
+        label: `${exam.nome_paciente || "Paciente"} - ${exam.titulo}`,
       },
       dates: exam.parsedDate!,
-    })
+    }),
   );
 
   attributes.value = newAttributes;
@@ -315,8 +363,9 @@ const fetchExams = async () => {
 
 const updateExamsByDay = () => {
   // Usa a data pré-processada, melhorando a performance ao clicar nos dias
-  dayExams.value = allExams.value.filter((exam) => 
-    exam.parsedDate && compareDateOnly(exam.parsedDate, selectedDate.value)
+  dayExams.value = allExams.value.filter(
+    (exam) =>
+      exam.parsedDate && compareDateOnly(exam.parsedDate, selectedDate.value),
   );
 };
 
@@ -325,7 +374,7 @@ const onDayClick = (selectedDay: any) => {
     selectedDate.value = selectedDay;
   } else if (selectedDay && selectedDay.date) {
     selectedDate.value = new Date(selectedDay.date);
-  } else if (typeof selectedDay === 'string') {
+  } else if (typeof selectedDay === "string") {
     selectedDate.value = new Date(selectedDay);
   }
   updateExamsByDay();
@@ -346,11 +395,12 @@ const openDeleteDialog = (id: number) => {
 const confirmDeleteAppointment = async () => {
   if (!appointmentToDelete.value) return;
   const id = appointmentToDelete.value;
-  
+
+  loader.startLoading();
   try {
     const res: any = await $api(`/agendamentos/${id}/delete`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${tokenCookie.value}` }
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${tokenCookie.value}` },
     });
     if (res.status === 200 || res.status === 204) {
       toast.success("Agendamento apagado com sucesso.");
@@ -364,46 +414,42 @@ const confirmDeleteAppointment = async () => {
   } finally {
     showDeleteDialog.value = false;
     appointmentToDelete.value = null;
+    loader.endLoading();
   }
 };
 
 const handleEditAppointment = (id: number) => {
-  const examToEdit = allExams.value.find(e => e.id_agendamento === id);
+  const examToEdit = allExams.value.find((e) => e.id_agendamento === id);
   if (!examToEdit) return;
 
   // Format date for datetime-local input (YYYY-MM-DDThh:mm)
-  let formattedDate = '';
+  let formattedDate = "";
   if (examToEdit.parsedDate) {
     formattedDate = formatDatetimeLocal(examToEdit.parsedDate);
   }
 
   form.value = {
-    paciente: { id_usuario: (examToEdit as any).id_paciente, nome: examToEdit.nome_paciente },
+    paciente: {
+      id_usuario: (examToEdit as any).id_paciente,
+      nome: examToEdit.nome_paciente,
+    },
     titulo: examToEdit.titulo,
     descricao: examToEdit.descricao,
     local: examToEdit.local,
     medico: examToEdit.medico,
     data: formattedDate,
   };
-  
-  pesquisaPaciente.value = examToEdit.nome_paciente || '';
+
+  pesquisaPaciente.value = examToEdit.nome_paciente || "";
   editingAppointmentId.value = id;
   showExamDetails.value = false;
-  tab.value = 'novo';
-};
-
-const sair = () => {
-  auth.logout();
-  router.push('/login');
+  tab.value = "novo";
 };
 
 const salvarAgendamento = async () => {
   if (!formRef.value) return;
   const { valid } = await formRef.value.validate();
-  
-  if (!valid) {
-    return;
-  }
+  if (!valid) return;
 
   salvando.value = true;
   try {
@@ -415,37 +461,50 @@ const salvarAgendamento = async () => {
       medico: form.value.medico.toUpperCase(),
       id_usuario: Number(form.value.paciente.id_usuario),
     };
+    loader.startLoading();
 
     let res: any;
     if (editingAppointmentId.value) {
       res = await $api(`/agendamentos/${editingAppointmentId.value}/update`, {
-        method: 'PUT',
+        method: "PUT",
         body: payload,
-        headers: { Authorization: `Bearer ${tokenCookie.value}` }
+        headers: { Authorization: `Bearer ${tokenCookie.value}` },
       });
     } else {
-      res = await $api('/agendamentos/create', {
-        method: 'POST',
+      res = await $api("/agendamentos/create", {
+        method: "POST",
         body: payload,
-        headers: { Authorization: `Bearer ${tokenCookie.value}` }
+        headers: { Authorization: `Bearer ${tokenCookie.value}` },
       });
     }
 
     if (res.status === 200 || res.status === 201) {
-      toast.success(editingAppointmentId.value ? 'Agendamento atualizado!' : 'Agendamento criado com sucesso!');
-      form.value = { paciente: null, titulo: '', descricao: '', data: '', local: '', medico: '' };
+      toast.success(
+        editingAppointmentId.value
+          ? "Agendamento atualizado!"
+          : `Agendamento criado com sucesso!`,
+      );
+      form.value = {
+        paciente: null,
+        titulo: "",
+        descricao: "",
+        data: "",
+        local: "",
+        medico: "",
+      };
       nextTick(() => {
         formRef.value?.resetValidation();
       });
       editingAppointmentId.value = null; // Clear edit mode
       fetchExams(); // Atualiza a lista de agendamentos após salvar
     } else {
-      toast.error('Erro ao salvar agendamento.');
+      toast.error("Erro ao salvar agendamento.");
     }
   } catch {
-    toast.error('Erro ao salvar agendamento.');
+    toast.error("Erro ao salvar agendamento.");
   } finally {
     salvando.value = false;
+    loader.endLoading();
   }
 };
 
@@ -462,15 +521,15 @@ watch(pesquisaPaciente, (val: string) => {
     buscandoPacientes.value = false;
     return;
   }
-  
+
   buscandoPacientes.value = true;
-  
+
   timeoutBusca = setTimeout(async () => {
     try {
-      const res: any = await $api('/usuarios/pesquisar', {
-        method: 'GET',
+      const res: any = await $api("/usuarios/pesquisar", {
+        method: "GET",
         query: { nome: val },
-        headers: { Authorization: `Bearer ${tokenCookie.value}` }
+        headers: { Authorization: `Bearer ${tokenCookie.value}` },
       });
       pacientesEncontrados.value = res.data || [];
     } catch {
@@ -497,7 +556,7 @@ onMounted(() => {
   max-height: 400px;
 }
 .calendar {
-  background-color: #ECEDF4;
+  background-color: #ecedf4;
   border-radius: 30px;
 }
 </style>

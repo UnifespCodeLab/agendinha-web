@@ -3,26 +3,28 @@
     <v-app-bar>
       <template #prepend>
         <v-app-bar-nav-icon>
-          <NuxtLink
-            href="/boas-vindas">
-            <v-icon 
-            style="background-color: #D7F2FF;"
-            class="pa-4 rounded-xl"
-            color="blue-dark" 
-            icon="mdi-chevron-left"/>
+          <NuxtLink href="/boas-vindas">
+            <v-icon
+              style="background-color: #d7f2ff"
+              class="pa-4 rounded-xl"
+              color="blue-dark"
+              icon="mdi-chevron-left"
+            />
           </NuxtLink>
         </v-app-bar-nav-icon>
-        <v-app-bar-title
-          class="font-weight-bold ml-2">Fazer login</v-app-bar-title>
+        <v-app-bar-title class="font-weight-bold ml-2"
+          >Fazer login</v-app-bar-title
+        >
       </template>
     </v-app-bar>
     <v-main class="d-flex flex-column ga-2 w-100 align-center">
       <p class="font-weight-bold text-h6 mb-3">Insira seus dados</p>
       <section class="content">
-        <v-text-field 
+        <v-text-field
           v-model="user.email"
           prepend-inner-icon="mdi-email-outline"
-          label="E-mail" />
+          label="E-mail"
+        />
         <v-text-field
           v-model="user.senha"
           prepend-inner-icon="mdi-form-textbox-password"
@@ -32,12 +34,20 @@
           @click:append-inner="show = !show"
         />
       </section>
-      <NuxtLink href="/pedido-alteracao-senha" class="font-weight-bold mb-4 text-blue-dark"
+      <NuxtLink
+        href="/pedido-alteracao-senha"
+        class="font-weight-bold mb-4 text-blue-dark"
         >Esqueci minha senha</NuxtLink
       >
       <v-btn class="content" @click="login">Entrar</v-btn>
       <p class="text-center">ou</p>
-      <v-btn color="black" width="250" class="align-self-center" variant="outlined" @click="loginWithGoogle">
+      <v-btn
+        color="black"
+        width="250"
+        class="align-self-center"
+        variant="outlined"
+        @click="loginWithGoogle"
+      >
         <Icon class="mr-4" name="icons:google-logo" size="30" />
         Entrar com o Google
       </v-btn>
@@ -48,7 +58,7 @@
 <script lang="ts">
 import { useAuthStore } from "~/stores/auth";
 import { useLoaderStore } from "~/stores/loader";
-import { validateEmail } from '~/utils/validate';
+import { validateEmail } from "~/utils/validate";
 
 export default defineComponent({
   name: "Login",
@@ -66,28 +76,28 @@ export default defineComponent({
   },
   methods: {
     loginWithGoogle() {
-      this.auth.authenticateUserGoogle(
-        async (status: number, data: any) => {
-          if(status == 403) {
-            this.toast.error("Este e-mail já foi criado sem o login via Google. Use outro.");
-            this.loader.endLoading();
-            return;
-          }
-          
-          if(status != 200) {
-            this.toast.error(data.message);
-            this.loader.endLoading();
-            return;
-          }
-
+      this.auth.authenticateUserGoogle(async (status: number, data: any) => {
+        if (status == 403) {
+          this.toast.error(
+            "Este e-mail já foi criado sem o login via Google. Use outro.",
+          );
           this.loader.endLoading();
-          if(this.auth.user.role == "ROLE_ADMIN") this.$router.push("/admin");
-          else this.$router.push("/");
-
-          const permission = await Notification.requestPermission();
-          if(permission == 'granted') await usePush(this.auth.user.id_usuario);
+          return;
         }
-      );
+
+        if (status != 200) {
+          this.toast.error(data.message);
+          this.loader.endLoading();
+          return;
+        }
+
+        this.loader.endLoading();
+        if (this.auth.user.role == "ROLE_ADMIN") this.$router.push("/admin");
+        else this.$router.push("/");
+
+        const permission = await Notification.requestPermission();
+        if (permission == "granted") await usePush(this.auth.user.id_usuario);
+      });
     },
     async login() {
       this.loader.startLoading();
@@ -98,21 +108,21 @@ export default defineComponent({
         return;
       }
 
-      if(this.user.senha.length <= 0) {
+      if (this.user.senha.length <= 0) {
         this.toast.error("Senha inválida.");
         this.loader.endLoading();
-        return;        
+        return;
       }
 
       const { status, data } = await this.auth.authenticateUser(this.user);
 
       if (status == 200) {
         this.loader.endLoading();
-        if(this.auth.user.role == "ROLE_ADMIN") this.$router.push("/admin");
+        if (this.auth.user.role == "ROLE_ADMIN") this.$router.push("/admin");
         else this.$router.push("/");
         const permission = await Notification.requestPermission();
-        if(permission == 'granted') await usePush(this.auth.user.id_usuario);
-        this.loader.endLoading()
+        if (permission == "granted") await usePush(this.auth.user.id_usuario);
+        this.loader.endLoading();
         return;
       }
 
@@ -122,12 +132,12 @@ export default defineComponent({
         return;
       }
 
-      if(status == 403) {
+      if (status == 403) {
         this.toast.error("Conta não confirmada.");
         this.loader.endLoading();
         return;
       }
-      
+
       this.toast.error("Erro ao fazer login.");
       this.loader.endLoading();
     },

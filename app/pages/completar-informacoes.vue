@@ -2,8 +2,9 @@
   <v-container class="position-fixed h-100">
     <v-app-bar>
       <template #prepend>
-        <v-app-bar-title
-          class="font-weight-bold ml-2">Completar Informações</v-app-bar-title>
+        <v-app-bar-title class="font-weight-bold ml-2"
+          >Completar Informações</v-app-bar-title
+        >
       </template>
     </v-app-bar>
     <v-main>
@@ -11,16 +12,13 @@
         v-model="formUser.nomeResponsavel.value"
         prepend-inner-icon="mdi-account-outline"
         label="Nome do(a) responsável"
-        />
-        <v-text-field 
+      />
+      <v-text-field
         v-model="formUser.idPaciente.value"
         prepend-inner-icon="mdi-card-account-details-outline"
-        label="ID do(a) paciente" 
-        />
-      <v-btn 
-        class="w-100 mb-5"
-        @click="update"
-        >Finalizar</v-btn>
+        label="ID do(a) paciente"
+      />
+      <v-btn class="w-100 mb-5" @click="update">Finalizar</v-btn>
     </v-main>
   </v-container>
 </template>
@@ -42,7 +40,7 @@ definePageMeta({ requiresRole: "ROLE_USER" });
 const formUser = {
   nomeResponsavel: ref(user.value.nome as string),
   email: user.value.email as string,
-  idPaciente: ref(null)
+  idPaciente: ref(null),
 };
 
 async function updateUserInfo(userInfo: UserUpdate) {
@@ -54,22 +52,22 @@ async function updateUserInfo(userInfo: UserUpdate) {
     headers: {
       Authorization: `Bearer ${token.value}`,
     },
-    body: userInfo
+    body: userInfo,
   });
   return response;
 }
 
 async function confirmAccount(data: string | number) {
   const { $api } = useNuxtApp();
-  
+
   let body: any = {};
 
-  if(isNumber(data)) body = { id_usuario: data };
+  if (isNumber(data)) body = { id_usuario: data };
   else body = { email: data };
 
   const response = await $api("/usuarios/confirmar", {
     method: "POST",
-    body
+    body,
   });
 
   return response;
@@ -77,7 +75,7 @@ async function confirmAccount(data: string | number) {
 
 async function update() {
   loader.startLoading();
-  if(formUser.idPaciente.value == null) {
+  if (formUser.idPaciente.value == null) {
     $toast.error("ID do paciente inválido.");
     loader.endLoading();
     return;
@@ -93,8 +91,8 @@ async function update() {
     confirmAccount(data.email),
   ]);
 
-  for(const response of responses) {
-    if(response.status != 200 && response.status != 204) {
+  for (const response of responses) {
+    if (response.status != 200 && response.status != 204) {
       $toast.error("Erro ao atualizar dados.");
       loader.endLoading();
       return;
@@ -104,5 +102,4 @@ async function update() {
   router.push("/");
   loader.endLoading();
 }
-
 </script>

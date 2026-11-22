@@ -1,14 +1,14 @@
-import { useToast } from 'vue-toast-notification';
-import 'vue-toast-notification/dist/theme-bootstrap.css';
+import { useToast } from "vue-toast-notification";
+import "vue-toast-notification/dist/theme-bootstrap.css";
 
 export default defineNuxtPlugin(() => {
-    const toast = useToast({
-        position: 'top-right',
-    });
+  const toast = useToast({
+    position: "top-right",
+  });
 
-    return {
-        provide: {
-            toast
-        }
-    };
+  return {
+    provide: {
+      toast,
+    },
+  };
 });
