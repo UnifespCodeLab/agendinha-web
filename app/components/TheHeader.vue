@@ -56,10 +56,7 @@
             size="24"
           />
           <span v-if="totalNotifications > 9" class="number-indicator">+9</span>
-          <span
-            v-if="totalNotifications > 0 && totalNotifications < 9"
-            class="number-indicator"
-          >
+          <span v-else-if="totalNotifications > 0" class="number-indicator">
             {{ totalNotifications }}
           </span>
           <p>Notificações</p>
@@ -79,13 +76,18 @@
 import { useAuthStore } from "~/stores/auth";
 
 const auth = useAuthStore();
-const totalNotifications = ref(0);
-totalNotifications.value = auth.notReadNotifications;
+const totalNotifications = ref(auth.notReadNotifications);
 
 watch(
   () => auth.notReadNotifications,
-  (value, _) => (totalNotifications.value = value),
+  (value) => (totalNotifications.value = value),
 );
+
+usePolling(() => {
+  if (!auth.user?.id_usuario || auth.user.role === "ROLE_ADMIN") return;
+  auth.refreshNotifications();
+}, 10_000);
+
 const currentTab = ref("/");
 const route = useRoute();
 const router = useRouter();

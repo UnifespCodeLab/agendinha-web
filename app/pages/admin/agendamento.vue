@@ -3,7 +3,7 @@
     <v-app-bar>
       <template #prepend>
         <v-app-bar-title class="font-weight-bold ml-2"
-          >Gerenciar agendamentos</v-app-bar-title
+          >Gerenciar Agendamentos</v-app-bar-title
         >
       </template>
     </v-app-bar>
