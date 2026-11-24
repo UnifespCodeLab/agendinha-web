@@ -3,11 +3,6 @@ import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 export default defineNuxtConfig({
   app: {
     pageTransition: { name: "slide-right", mode: "out-in" },
-    head: {
-      link: [
-        { rel: 'manifest', href: '/manifest.json' }
-      ]
-    }
   },
   compatibilityDate: "2024-04-03",
   devtools: { enabled: false },
@@ -29,6 +24,22 @@ export default defineNuxtConfig({
       });
     },
   ],
+  pwa: {
+    manifest: {
+      name: "Agendinha",
+      description: "Agendinha",
+      short_name: "Agendinha",
+      display: "standalone",
+      background_color: "#ffffff",
+    },
+    workbox: {
+      navigateFallback: "/",
+    },
+    devOptions: {
+      enabled: true,
+      type: "module"
+    }
+  },
   icon: {
     customCollections: [
       {

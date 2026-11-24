@@ -1,4 +1,5 @@
 <template>
+  <VitePwaManifest />
   <NuxtLoadingIndicator />
   <v-progress-circular v-if="loader.isLoading" class="loading" indeterminate />
   <v-app>
