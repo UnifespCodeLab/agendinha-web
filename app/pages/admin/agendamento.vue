@@ -256,8 +256,8 @@
 </template>
 
 <script setup lang="ts">
-import type Appointment from "~~/shared/types/appointment";
-import type CalendarAttributes from "~~/shared/types/calendarAttributes";
+import type Appointment from "~/types/appointment";
+import type CalendarAttributes from "~/types/calendarAttributes";
 import {
   parseDateFromAPI,
   compareDateOnly,

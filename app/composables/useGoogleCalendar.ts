@@ -1,4 +1,4 @@
-import type Appointment from "~~/shared/types/appointment";
+import type Appointment from "~/types/appointment";
 
 export function useGoogleCalendar() {
   const config = useRuntimeConfig();

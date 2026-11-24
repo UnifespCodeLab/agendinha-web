@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import type { User } from "~~/shared/types/user";
+import type { User } from "~/types/user";
 import formatPhoneNumber from "~/utils/formatPhoneNumber";
 
 const config = useRuntimeConfig();

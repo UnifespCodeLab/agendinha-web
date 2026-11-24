@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import type NotificationRegister from "~~/shared/types/notificationRegister";
+import type NotificationRegister from "~/types/notificationRegister";
 
 definePageMeta({ showHeader: true, requiresRole: "ROLE_ADMIN" });
 

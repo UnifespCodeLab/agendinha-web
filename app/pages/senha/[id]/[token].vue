@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import type UserNewPasswordWithoutLogin from "~~/shared/types/userNewPasswordWithoutLogin";
+import type UserNewPasswordWithoutLogin from "~/types/userNewPasswordWithoutLogin";
 import { useLoaderStore } from "~/stores/loader";
 const route = useRoute();
 const loader = useLoaderStore();

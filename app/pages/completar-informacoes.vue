@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { useAuthStore } from "~/stores/auth";
-import type UserUpdate from "~~/shared/types/userUpdate";
+import type UserUpdate from "~/types/userUpdate";
 import { useLoaderStore } from "~/stores/loader";
 import isNumber from "~/utils/isNumber";
 

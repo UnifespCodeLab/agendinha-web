@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import type UserUpdate from "~~/shared/types/userUpdate";
+import type UserUpdate from "~/types/userUpdate";
 import { useAuthStore } from "~/stores/auth";
 import { useLoaderStore } from "~/stores/loader";
 
