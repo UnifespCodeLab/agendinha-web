@@ -33,7 +33,7 @@
 
 <script lang="ts" setup>
 import { useLoaderStore } from "~/stores/loader";
-import type UserNewPasswordWithoutLogin from "~~/shared/types/userNewPasswordWithoutLogin";
+import type UserNewPasswordWithoutLogin from "~/types/userNewPasswordWithoutLogin";
 
 const route = useRoute();
 const loader = useLoaderStore();

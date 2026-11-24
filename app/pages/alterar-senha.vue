@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import type UserNewPasswordWithLogin from "~~/shared/types/userNewPasswordWithLogin";
+import type UserNewPasswordWithLogin from "~/types/userNewPasswordWithLogin";
 import { useAuthStore } from "~/stores/auth";
 import { useLoaderStore } from "~/stores/loader";
 

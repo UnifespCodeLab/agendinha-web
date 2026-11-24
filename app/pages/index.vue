@@ -123,12 +123,12 @@
 </template>
 
 <script lang="ts">
-import type Appointment from "~~/shared/types/appointment";
+import type Appointment from "~/types/appointment";
 import convertToISODate from "~/utils/convertToISODate";
 import moment from "moment";
 import { useLoaderStore } from "~/stores/loader";
-import type CalendarAttributes from "~~/shared/types/calendarAttributes";
-import type CalendarDay from "~~/shared/types/calendarDay";
+import type CalendarAttributes from "~/types/calendarAttributes";
+import type CalendarDay from "~/types/calendarDay";
 import { useAuthStore } from "~/stores/auth";
 
 export default defineComponent({

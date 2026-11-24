@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import type Appointment from "~~/shared/types/appointment";
+import type Appointment from "~/types/appointment";
 import convertToISODate from "~/utils/convertToISODate";
 
 defineProps({

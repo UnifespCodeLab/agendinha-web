@@ -69,7 +69,7 @@
   </v-bottom-sheet>
 </template>
 <script lang="ts" setup>
-import type ShowAppointment from "~~/shared/types/showAppointment";
+import type ShowAppointment from "~/types/showAppointment";
 import { useAuthStore } from "~/stores/auth";
 import { useLoaderStore } from "~/stores/loader";
 import convertToISODate from "~/utils/convertToISODate";

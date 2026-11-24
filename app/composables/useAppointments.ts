@@ -1,4 +1,4 @@
-import type Appointment from "~~/shared/types/appointment";
+import type Appointment from "~/types/appointment";
 
 export const useAppointments = () => {
   const config = useRuntimeConfig();

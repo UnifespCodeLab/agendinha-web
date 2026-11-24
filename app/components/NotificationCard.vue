@@ -36,7 +36,7 @@
   </v-bottom-sheet>
 </template>
 <script lang="ts" setup>
-import type ShowNotification from "~~/shared/types/showNotification";
+import type ShowNotification from "~/types/showNotification";
 import { useLoaderStore } from "~/stores/loader";
 
 const props = defineProps<ShowNotification>();

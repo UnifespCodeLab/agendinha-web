@@ -133,7 +133,7 @@
 </template>
 
 <script lang="ts" setup>
-import type ShowUser from "~~/shared/types/showUser";
+import type ShowUser from "~/types/showUser";
 
 const PHONE_BR_REGEX =
   /^(?:\+?55\s?)?(?:\(?[1-9][0-9]\)?\s?)?(?:9\d{4}|[2-5]\d{3})-?\d{4}$/;

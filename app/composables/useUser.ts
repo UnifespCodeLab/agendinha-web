@@ -1,6 +1,6 @@
-import type UserUpdate from "~~/shared/types/userUpdate";
-import type UserProfilePhotoUpdate from "~~/shared/types/userProfilePhotoUpdate";
-import type UserNewPasswordWithLogin from "~~/shared/types/userNewPasswordWithLogin";
+import type UserUpdate from "~/types/userUpdate";
+import type UserProfilePhotoUpdate from "~/types/userProfilePhotoUpdate";
+import type UserNewPasswordWithLogin from "~/types/userNewPasswordWithLogin";
 
 export const useUser = () => {
   const config = useRuntimeConfig();

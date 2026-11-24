@@ -1,4 +1,4 @@
-import type NotificationType from "#shared/types/notification";
+import type NotificationType from "~/types/notification";
 
 export const useNotification = () => {
   const config = useRuntimeConfig();

@@ -159,11 +159,11 @@
 
 <script lang="ts">
 import { useLoaderStore } from "~/stores/loader";
-import type UserRegister from "~~/shared/types/userRegister";
-import type { User } from "~~/shared/types/user";
+import type UserRegister from "~/types/userRegister";
+import type { User } from "~/types/user";
 import { useAuthStore } from "~/stores/auth";
-import type GuardianRegister from "~~/shared/types/guardianRegister";
-import type ShowUser from "~~/shared/types/showUser";
+import type GuardianRegister from "~/types/guardianRegister";
+import type ShowUser from "~/types/showUser";
 
 const EMAIL_REGEX = /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 const PHONE_BR_REGEX =
